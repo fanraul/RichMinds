@@ -9,7 +9,7 @@ import os
 from R10_sensor import (fetch_stock_fin_reports_from_tquant,
                         fetch_stocklist_from_Tquant ,
                         fetch_stock_category_and_daily_status_from_qq ,
-                        fetch_stock_change_record_from_qq ,
+                        # fetch_stock_change_record_from_qq ,
                         fetch_stock_core_concept_from_eastmoney ,
                         fetch_stock_structure_hist_from_sina ,
                         fetch_stock_shareholder_from_eastmoney,

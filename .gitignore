@@ -6,7 +6,8 @@ Z30_qas/
 #################
 ## Eclipse
 #################
-
+*.xls
+*.xlsx
 *.pydevproject
 .project
 .metadata
