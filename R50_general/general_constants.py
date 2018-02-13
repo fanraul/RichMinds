@@ -235,7 +235,7 @@ scheduleman = {
     },
     'fetch_stock_dailybar_from_tquant':{
         'rule': 'W',
-        'weekdays': [4, ]  # Friday
+        'weekdays': [6, ]  # Sunday, run at 6:00PM friday can't get friday's dailybar, so change to sunday
     },
     'fetch_stock_dailybar_from_netease': {
         'rule': 'W',

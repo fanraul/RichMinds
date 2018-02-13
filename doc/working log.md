@@ -1,6 +1,29 @@
+1. TODO:修改gcf中的函数**get_last_trading_day**,CN市场改成从Tquant中获得.
+
+## 2018-2-12 & 2018-2-13
+1. 完成测试Tquant自有行情接口数据并更新文档(onenote中).
+2. 导入futuquant历史数据到futu客户端
+3. 测试futuquant行情接口
+
+
+
+## 2018-2-11 & 2018-2-10
+1. 完成Tquant中从掘金量化myquant获得数据的行情数据接口的测试及文档工作.初步决定:
+    - ticks info : need to use
+    - dailybar: need to check futu to decide which resource to use
+        - general bar: need to check futu to decide which resource to use
+    - stock share info: need to use
+    - stock market figure info: not use
+    - 指数权重: need to use
+    - financial figures: not use
+    - stock_adj: not use
+    - divident分红送配信息" need to use
+
+
 ## 2018-2-9
 1. 修改**stock_basic_info**的列**Tquant_Market_ID**为**Tquant_symbol_ID**
 2. 富途牛牛客户端在MAC电脑上的客户端无法使用问题已解决,解决人是_富途研发_Hugh(384862429)_. 方法是把ApiDiscla.dat放到 %appdata%\FTNN\1.0\Common里面再重启即可.
+3. 重写部分Tquant的函数,研究Tquant的接口功能.
 
 ## 2018-2-8
 1. 另外设置一个job **Richmind_index_with_no_stock_assigned_retry**,在每天的闲时(凌晨4点),对所有列**idx_exclusion_flg**标识为X的IDX进行查询,如果该IDX能找到所含的stocklist,则更新数据库并发邮件给我,然后我手工重置这个flg.

@@ -22,7 +22,9 @@ add one month for buffer, total go-live date: 2018/7/1
       - 上海及深圳上市的股票清单now: BD_L2_00_cn_stocklist_with_general_info_now
       - 上海及深圳股票历史名称变更:BD_L1_10_cn_stock_name_changes_hist
   - [ ] stock dailybar
-      - 
+      - tick info
+      - daily bar
+      - n minutes bar?
   - [ ] category list
   - [ ] category daily bar
   - [ ] index list
@@ -37,7 +39,8 @@ add one month for buffer, total go-live date: 2018/7/1
       - 利润表now
       - 现金流量表now      
   - [ ] stock shareholder info
-  - [ ] stock 资金流 *
+  - [ ] stock 资金流 *  ->数据源已找到,参见postman-collection-richmind-key apis-☆ 东方财富_资金流向API
+        ![](https://i.imgur.com/zJHzcce.png)
   - [ ] category 资金流 *
   - [ ] index 资金流 *
   - [ ] stock 转股(如股票改号码,股票A转成股票B) **

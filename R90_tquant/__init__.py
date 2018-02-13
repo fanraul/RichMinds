@@ -5,7 +5,7 @@ import R90_tquant.myquant as mt
 def get_financial(symbol):#3大财报
     return gt.get_financial(symbol)
 def get_ipo():#新股
-    return gt.ths_ipo()
+    return gt.get_ipo()
 def get_tfp(Date):#停复牌
     return gt.get_tfp(Date)
 def get_brief(symbol_list):# 公司概况

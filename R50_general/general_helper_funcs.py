@@ -21,7 +21,6 @@ from bs4 import BeautifulSoup
 from pandas import DataFrame
 from http.client import BadStatusLine
 
-import R90_tquant.getdata as gt
 from R50_general import general_constants as gc
 
 from futuquant.open_context import *

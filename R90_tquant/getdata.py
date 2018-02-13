@@ -9,16 +9,29 @@ from bs4 import *
 import lxml
 from multiprocessing.dummy import Pool
 import socket
+import R50_general.general_helper_funcs as gcf
 
+additional_headers = 'NA'
+dt_ipo_add_header = {'Cookie': "__utma=156575163.1113769600.1518082204.1518082204.1518082204.1; __utmc=156575163; "
+                               "__utmz=156575163.1518082204.1.1.utmcsr=10jqka.com.cn|utmccn=(referral)|utmcmd=referral|utmcct=/; "
+                               "searchGuide=sg; Hm_lvt_78c58f01938e4d85eaf619eae71b4ed1=1518082479; "
+                               "Hm_lpvt_78c58f01938e4d85eaf619eae71b4ed1=1518082479; spversion=20130314; "
+                               "historystock=000045%7C*%7C600426; log=; v=AvH-1z-qD_xnkaMUsXGSProvAHaP3mVQD1IJZNMG7bjX-h_gGy51IJ-iGS9h",
+                    }
 
 def _get_data(url):
-    time.sleep(0.1)
-    headers = {'Connection': 'keep-alive',
-               'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.89 Safari/537.36',
+    time.sleep(0.5)
+    headers = {#'Connection': 'keep-alive',
+               'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36',
                }
-    data = None
- 
-    req = urllib.request.Request(url, data, headers)
+
+    if additional_headers == 'ipo_add_header':
+        headers.update(dt_ipo_add_header )
+
+    # print(headers)
+
+    gcf.logprint('open url:' + url)
+    req = urllib.request.Request(url=url,headers= headers)
     ret = urllib.request.urlopen(req)
     return ret
 
@@ -102,8 +115,12 @@ def _cninfo(cs):
     for i in range(3):
         del ret[0]
     return ret
-def ths_ipo():
+def get_ipo():
     url = 'http://data.10jqka.com.cn/ipo/xgsgyzq/board/all/field/SGDATE/page/1/order/desc/ajax/1/'
+    # Terry add 这个网页必须要添加request cookie才能正常访问,否则会收到403 Fobidden error
+    # this flag will be processed in func _get_data(url)
+    global additional_headers
+    additional_headers = 'ipo_add_header'
     try :
         var = _soup(url,'td')
         title =_soup(url,'a')
@@ -162,7 +179,9 @@ def _ftptmp(tfp):
     for i in range(1, z // 6):
         tmp = {}
         for j in range(6):
-            tmp[title[j]] = tfp[i * 6 + j].text
+            # Terry Fan update, treat '&nbsp' as None
+            tmp[title[j]] = tfp[i * 6 + j].text.strip() if tfp[i * 6 + j].text.strip() != '&nbsp' else None
+            # tmp[title[j]] = tfp[i * 6 + j].text   #original code
         var.append(tmp)
     return var
 
@@ -187,7 +206,7 @@ def _get_brief(hy):#公司概况
 
 def get_brief(symbol_list):#公司概况
     n = 1
-    if len(symbol_list) >4 :
+    if len(symbol_list) > 4 :
         n = 4
     var = _thread(_get_brief,symbol_list,n)
     var =  pd.DataFrame(var)
@@ -407,7 +426,7 @@ def get_last_dailybar(symbol_list):#取当日截面数据
         ret = ret.set_index('code')
     return ret
 
-#######h获取TICK
+####### 获取TICK
 def _get_tick(cs):
     symbol = cs[0]
     page =str(cs[1])
@@ -421,6 +440,7 @@ def _get_tick(cs):
         var.append(VAR[i])
     var[0] = var[0][6:len(var[0]) - 2].split(',')
     for i in range(len(var[0])):
+        # print(var[0][i])
         var[0][i] = int(var[0][i].split(':')[1])
     var[1] = var[1].split('"')
     del var[1][6]
@@ -907,7 +927,7 @@ def _get_tick2(cs):
     except :
         var = _tick_onday(cs)
     return var
-def get_tick_history(hy,dt):
+def get_tick_history(hy,dt):  # dt:YYYYMMDD or YYYY-MM-DD
     if len(dt) == 8:
         dt = dt[:4] + '-' + dt[4:6] + '-' + dt[6:8]
     hy = _hy_xl(hy)
@@ -1228,4 +1248,70 @@ def get_future_tick(symbol):
     TICK = pd.DataFrame(TICK)
     TICK = TICK.set_index('date')
     return TICK
+
+
+if __name__  =='__main__':
+    import R50_general.general_helper_funcs as gcf
+    import os
+
+    symbol_list = ['600100', '600053', '600030', '000002', '300314']
+    symbol = '000002'
+
+    var = get_lastest(symbol_list)
+    gcf.dfmprint(var)
+    # var = get_stocklist()
+    # var.to_excel("realtime_stock_trading_info.xlsx")
+
+
+    # var = get_money_on_minute('600053')
+    var = get_allotment(symbol)
+    gcf.dfmprint(var)
+
+
+    # var = get_fh_all()
+
+    os._exit(0)
+
+    # symbol_list = ['600100']
+
+    var = get_last_tick(symbol_list)
+    gcf.dfmprint(var)
+
+    var =get_last100_ticks(symbol_list)
+    gcf.dfmprint(var)
+
+    var =get_all_ticks(symbol_list)
+    gcf.dfmprint(var)
+
+    os._exit(0)
+
+    # var = get_last_dailybar(symbol_list)
+    # gcf.dfmprint(var)
+    # # os._exit(0)
+    #
+    #
+    # var = get_moneyflow(symbol_list)
+    # gcf.dfmprint(var)
+    # os._exit(0)
+
+
+    var = get_tick_history('600053','20180205')
+    gcf.dfmprint(var)
+    var.to_excel('ticks_600053_20180205.xlsx')
+    var2 = var.groupby(['close']).sum()
+    gcf.dfmprint(var2)
+    os._exit(0)
+
+    var = get_tfp('2018-2-12')
+    gcf.dfmprint(var)
+
+    os._exit(0)
+
+
+    var = get_ipo()
+    gcf.dfmprint(var)
+
+    var = get_brief(['600100','600000','600030','000002','300314'])
+    gcf.dfmprint(var)
+    pass
 
