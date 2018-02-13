@@ -255,7 +255,7 @@ if __name__ == '__main__':  # sample test for demo
     print('result of get_last_n_dailybars' + '-'*60)
     gcf.dfmprint(var)
 
-    os._exit(0)
+    # os._exit(0)
 
     #Tquant的dailybar
     var = get_dailybars("SHSE.600547", begin_date, end_date)
