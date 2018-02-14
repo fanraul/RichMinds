@@ -24,7 +24,7 @@ else:
     assert 0==1,'unknown host type'
 
 
-futu_api_ip = '127.0.0.1'
+# futu_api_ip = '127.0.0.1'
 futu_api_port = 11111
 
 Global_Job_Log_Base_Direction = 'C:/00_RichMinds/log/'
