@@ -31,6 +31,8 @@ Global_Job_Log_Base_Direction = 'C:/00_RichMinds/log/'
 
 Global_email_receiver = 'terry.fan@sparkleconsulting.com;fanraul@icloud.com'
 
+tmp_output_path = 'C:\\00_RichMinds\\Github\\RichMinds\\ZZ_output\\'
+
 weblinks = {
     'stock_list_easymoney': 'http://quote.eastmoney.com/stocklist.html',   # obselete
     'stock_change_record_qq': 'http://stock.finance.qq.com/corp1/profile.php?zqdm=%(stock_id)s',
@@ -278,7 +280,14 @@ scheduleman = {
 
 # the date which shouldn't run the job
 excluded_dates =['2018-1-1',
-                 '2019-1-1']
+                 '2019-1-1',
+                 '2018-2-16',
+                 '2018-2-17',
+                 '2018-2-19',
+                 '2018-2-20',
+                 '2018-2-21',
+                 '2018-2-22',
+                 ]
 
 
 email_smtp_server = "smtp.163.com"

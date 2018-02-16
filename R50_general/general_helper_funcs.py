@@ -366,6 +366,14 @@ def get_last_trading_daytime(market_id:str='SH'):
     return last_trading_daytime
 
 def get_trading_days_futuquant(market, start_date=None, end_date=None):
+    '''
+
+    :param market:市场标识
+    :param start_date:起始日期;string类型，格式YYYY-MM-DD，仅指定到日级别即可，默认值None表示最近一年前的日期
+    :param end_date:结束日期; string类型，格式YYYY-MM-DD，仅指定到日级别即可，取默认值None表示取当前日期
+    :return: ret_code失败时，ret_data返回为错误描述字符串； 客户端无数据时，
+             ret_code为成功，ret_data返回None,正常情况下，ret_data为日期列表（每个日期是string类型），如果指定时间段中无交易日，则ret_data为空列表。
+    '''
     # 实例化行情上下文对象
     quote_ctx = OpenQuoteContext(api_ip, api_port)
     ret,ls_trading_days = quote_ctx.get_trading_days(market, start_date, end_date)
@@ -534,6 +542,9 @@ def get_cur_file_name_by_module_name(name):
     else:
         # it is run as a module, get file name from module2's varable __name__
         return name.split('.')[-1]
+
+def get_tmp_file(filename):
+    return gc.tmp_output_path + filename
 
 def get_stock_current_trading_info_sina(mktstks,return_format,batch_size = 40):
     # TODO new functions need to be developed based on future usage, currently only work for one mktstk and return one dfm.
