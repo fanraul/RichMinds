@@ -14,7 +14,11 @@ from http.client import BadStatusLine
 
 
 def getweekday():
-    weekday = datetime.utcnow().weekday()
+    today = datetime.utcnow()
+    if today.strftime("%Y-%m-%d") in gc.excluded_dates:
+        logprint('No need to run the job today due that today is in excluded date list')
+        os._exit(0)
+    weekday = today.weekday()
 
     # overwrite weekday as certain date for re-processing only***********************
     # for example, reprocess at Saturday and assume it it Friday.
@@ -119,3 +123,6 @@ def func_call_with_trace(func_name,*func_args,dt_args_w_name = {},program_name:s
     logprint('*********  End function call %s.%s, time spent: %d seconds  *************' % (program_name,
                                                                                             func_name.__name__,
                                                                                             time_spent.total_seconds()))
+
+if __name__ == '__main__':
+    print(getweekday())

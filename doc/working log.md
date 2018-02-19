@@ -1,11 +1,26 @@
-1. TODO:修改gcf中的函数**get_last_trading_day**,CN市场改成从Tquant中获得.
+TODO:
+1. 修改gcf中的函数**get_last_trading_day**,CN市场改成从Tquant中获得.
+2. Tushare的get_realtime_quotes:实时取得股票当前报价和成交信息函数与自由函数gcf.get_stock_current_trading_info_sina的比较与融合.
 
-## 2018-2-12 & 2018-2-13
+## 2018-2-19
+1. 测试Tushare提供的接口
+
+
+## 2018-2-18
+1. 在101.132.98.4上安装sql server
+2. 101.132.98.4 完成所有历史数据的下载
+
+## 2018-2-16 & 2018-2-17
+1. 重新安装小机箱PC的win10操作系统
+2. 整理3TB 硬盘的数据
+
+## 2018-2-15
+NA
+
+## 2018-2-12 & 2018-2-13 & 2018-2-14
 1. 完成测试Tquant自有行情接口数据并更新文档(onenote中).
 2. 导入futuquant历史数据到futu客户端
-3. 测试futuquant行情接口
-
-
+3. 学习futuquant低频数据行情接口
 
 ## 2018-2-11 & 2018-2-10
 1. 完成Tquant中从掘金量化myquant获得数据的行情数据接口的测试及文档工作.初步决定:
