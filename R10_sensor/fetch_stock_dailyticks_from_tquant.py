@@ -78,29 +78,30 @@ def fetch2DB(stockid:str):
             begin_time_tmp = end_time_tmp
             if len(dfm_tick_day) > 0:
                 ls_ticks_info.append(dfm_tick_day)
-        dfm_ticks = pd.concat(ls_ticks_info)
-
-        if len(dfm_ticks) == 0:
-            logprint('No stock dailybars can be found for stockid %s' %row['Stock_ID'], ' after tquant api fetch.')
+        if len(ls_ticks_info) > 0:
+            dfm_ticks = pd.concat(ls_ticks_info)
         else:
-            # step2: format raw data into prop data type
-            # gcf.dfmprint(dfm_ticks)
-            dfm_ticks['tick_Datetime'] = dfm_ticks.index
-            dfm_ticks['Trans_Datetime'] = dfm_ticks.apply(lambda s: s['tick_Datetime'].date(), axis=1)
-            dfm_ticks.set_index('Trans_Datetime', inplace=True)
-            del dfm_ticks['code']
-            # dfm_ticks.to_excel(gcf.get_tmp_file('%s-ticks.xlsx' %stockid))
+            logprint('No stock dailyticks can be found for stockid %s' %row['Stock_ID'], ' after tquant api fetch.')
+            continue
 
-            gcf.dfm_col_type_conversion(dfm_ticks, columns=dict_cols_cur)
-            # gcf.dfmprint(dfm_stk_info)
-            df2db.load_dfm_to_db_multi_value_by_mkt_stk_w_hist(row['Market_ID'],
-                                                               row['Stock_ID'],
-                                                               dfm_ticks,
-                                                               table_name,
-                                                               dict_misc_pars,
-                                                               float_fix_decimal =2,
-                                                               partial_ind=True,
-                                                               is_HF_conn=True)
+        # step2: format raw data into prop data type
+        # gcf.dfmprint(dfm_ticks)
+        dfm_ticks['tick_Datetime'] = dfm_ticks.index
+        dfm_ticks['Trans_Datetime'] = dfm_ticks.apply(lambda s: s['tick_Datetime'].date(), axis=1)
+        dfm_ticks.set_index('Trans_Datetime', inplace=True)
+        del dfm_ticks['code']
+        # dfm_ticks.to_excel(gcf.get_tmp_file('%s-ticks.xlsx' %stockid))
+
+        gcf.dfm_col_type_conversion(dfm_ticks, columns=dict_cols_cur)
+        # gcf.dfmprint(dfm_stk_info)
+        df2db.load_dfm_to_db_multi_value_by_mkt_stk_w_hist(row['Market_ID'],
+                                                           row['Stock_ID'],
+                                                           dfm_ticks,
+                                                           table_name,
+                                                           dict_misc_pars,
+                                                           float_fix_decimal =2,
+                                                           partial_ind=True,
+                                                           is_HF_conn=True)
 
     if stockid =='':
         df2db.updateDB_last_fetch_date(global_module_name,last_trading_datetime)
