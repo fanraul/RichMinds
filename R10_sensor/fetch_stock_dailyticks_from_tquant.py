@@ -111,5 +111,5 @@ def auto_reprocess():
     df2db.updateDB_last_fetch_date(global_module_name, last_trading_datetime)
 
 if __name__ == '__main__':
-    fetch2DB('300692')
-    # auto_reprocess()
+    # fetch2DB('300692')
+    auto_reprocess()
