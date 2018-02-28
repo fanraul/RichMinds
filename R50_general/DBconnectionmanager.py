@@ -8,14 +8,30 @@ import socket
 hostname = socket.gethostname()
 if hostname in ls_hostname_DEV:
     DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind'
+    HF_DB_connection_string = DB_connection_string
 elif hostname in ls_hostname_PRD:
     DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind_PRD'
+    HF_DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind_HF_PRD'
 else:
     assert 0==1,'please update the hostname to decide which SQL server to link!'
 
 class Dbconnectionmanager:
     def __init__(self, echo=False):
         self.engine = create_engine(DB_connection_string,echo = echo)
+        self.conn = self.engine.connect()
+
+    def getengine(self):
+        return self.engine
+
+    def getconn(self):
+        return self.conn
+
+    def closeconn(self):
+        self.conn.close()
+
+class HF_Dbconnectionmanager:
+    def __init__(self, echo=False):
+        self.engine = create_engine(HF_DB_connection_string,echo = echo)
         self.conn = self.engine.connect()
 
     def getengine(self):

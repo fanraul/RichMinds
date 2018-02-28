@@ -2,8 +2,16 @@ TODO:
 1. 修改gcf中的函数**get_last_trading_day**,CN市场改成从Tquant中获得.
 2. Tushare的get_realtime_quotes:实时取得股票当前报价和成交信息函数与自由函数gcf.get_stock_current_trading_info_sina的比较与融合.
 
-## 2018-2-19
+## 2018-2-27
+
+
+## 2018-2-21 - 2018-2-26
+回湖南过年, do nothing
+
+## 2018-2-19 & 2018-2-20
 1. 测试Tushare提供的接口
+    - 交易数据接口测试完毕
+2. 完成每日sensor job 的excluded date逻辑,当当天日期再excluded date中维护过时,会自动终止job,不再执行.
 
 
 ## 2018-2-18

@@ -1257,33 +1257,33 @@ if __name__  =='__main__':
     symbol_list = ['600100', '600053', '600030', '000002', '300314']
     symbol = '000002'
 
-    var = get_lastest(symbol_list)
-    gcf.dfmprint(var)
+    # var = get_lastest(symbol_list)
+    # gcf.dfmprint(var)
     # var = get_stocklist()
     # var.to_excel("realtime_stock_trading_info.xlsx")
 
 
     # var = get_money_on_minute('600053')
-    var = get_allotment(symbol)
-    gcf.dfmprint(var)
+    # var = get_allotment(symbol)
+    # gcf.dfmprint(var)
 
 
     # var = get_fh_all()
 
-    os._exit(0)
+    # os._exit(0)
 
     # symbol_list = ['600100']
 
-    var = get_last_tick(symbol_list)
-    gcf.dfmprint(var)
-
-    var =get_last100_ticks(symbol_list)
-    gcf.dfmprint(var)
-
-    var =get_all_ticks(symbol_list)
-    gcf.dfmprint(var)
-
-    os._exit(0)
+    # var = get_last_tick(symbol_list)
+    # gcf.dfmprint(var)
+    #
+    # var =get_last100_ticks(symbol_list)
+    # gcf.dfmprint(var)
+    #
+    # var =get_all_ticks(symbol_list)
+    # gcf.dfmprint(var)
+    #
+    # os._exit(0)
 
     # var = get_last_dailybar(symbol_list)
     # gcf.dfmprint(var)
@@ -1297,7 +1297,8 @@ if __name__  =='__main__':
 
     var = get_tick_history('600053','20180205')
     gcf.dfmprint(var)
-    var.to_excel('ticks_600053_20180205.xlsx')
+    var.to_excel(gcf.get_tmp_file('ticks_600053_20180205.xlsx'))
+
     var2 = var.groupby(['close']).sum()
     gcf.dfmprint(var2)
     os._exit(0)

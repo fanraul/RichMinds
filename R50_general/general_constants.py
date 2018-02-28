@@ -2,6 +2,7 @@ from datetime import datetime
 import socket
 # the earliset dailybar date time, in dev, it's currently it is 2014-1-1.
 Global_dailybar_begin_date = datetime(2017,1,1).date()
+Global_dailyticks_begin_datetime = datetime(2018,2,1)
 
 hostname = socket.gethostname()
 ls_hostname_PRD = ['iZgaizjy01f4atZ',]
@@ -81,6 +82,7 @@ dbtables = {
     'stock_index_stocks_futuquant':'DD_stock_index_stocks_futuquant',
     'category':'ZCFG_category',
     'stock_category_stocks_futuquant':'DD_stock_category_stocks_futuquant',
+    'stock_dailyticks_Tquant':'HF_stock_dailyticks_Tquant',
 }
 dbtemplate_stock_date = """
 CREATE TABLE [%(table)s](

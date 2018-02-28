@@ -1,5 +1,6 @@
 import R50_general.general_constants
 from R50_general.DBconnectionmanager import Dbconnectionmanager as dcm
+from R50_general.DBconnectionmanager import HF_Dbconnectionmanager as hf_dcm
 from R50_general.general_helper_funcs import logprint
 import pandas as pd
 from pandas import Series, DataFrame,Timedelta
@@ -12,6 +13,9 @@ import time
 # step1: get DB connection
 dcm_sql = dcm(echo=False)
 conn = dcm_sql.getconn()
+
+hf_dcm_sql = hf_dcm(echo=False)
+hf_conn = hf_dcm_sql.getconn()
 
 def get_cn_stocklist(stock :str ="", ls_excluded_stockids=[]) -> DataFrame:
     """
@@ -429,7 +433,7 @@ def pandas_numpy_type_convert_to_standard(par):
 def load_dfm_to_db_multi_value_by_mkt_stk_w_hist(market_id, item, dfm_data: DataFrame, table_name: str,
                                                  dict_misc_pars: dict, processing_mode: str = 'w_update',
                                                  enable_delete = True, partial_ind = False,
-                                                 float_fix_decimal =4):
+                                                 float_fix_decimal =4,is_HF_conn = False):
 
     """
     传入的datafram中的index必须是datetime类型的时间参数,代表trans datetime.
@@ -444,11 +448,18 @@ def load_dfm_to_db_multi_value_by_mkt_stk_w_hist(market_id, item, dfm_data: Data
     :return:
     """
     dt_key_cols = {'Market_ID':market_id,'Stock_ID':item}
-    load_dfm_to_db_multi_value_by_key_cols_w_hist(dt_key_cols,dfm_data,table_name,dict_misc_pars,processing_mode,enable_delete,partial_ind,float_fix_decimal)
+    load_dfm_to_db_multi_value_by_key_cols_w_hist(dt_key_cols,dfm_data,table_name,dict_misc_pars,
+                                                  processing_mode,enable_delete,partial_ind,
+                                                  float_fix_decimal,is_HF_conn)
 
 def load_dfm_to_db_multi_value_by_key_cols_w_hist(
-        dt_key_cols:dict,dfm_data:DataFrame,table_name:str,dict_misc_pars:dict,processing_mode:str,enable_delete,partial_ind,float_fix_decimal):
+        dt_key_cols:dict,dfm_data:DataFrame,table_name:str,dict_misc_pars:dict,processing_mode:str,
+        enable_delete,partial_ind,float_fix_decimal,is_HF_conn):
     # TODO: delete的处理,目前作为inconsistency,看实际的发生情况再做处理
+
+    # if hf connection, switch conn to HF SQL server DB
+    if is_HF_conn:
+        conn = hf_conn
 
     # load DB contents
     timestamp = datetime.now()
@@ -628,7 +639,7 @@ def insert_multi_value_dfm_to_db_by_key_cols_transdate(dt_key_cols:dict,trans_da
 
     # insert into db
     ls_ins_pars = []
-    logprint('Insert %s entry %s Period %s' % (table_name,dt_key_cols, trans_datetime.date()))
+    logprint('Insert %s entry %s Period %s' % (table_name,dt_key_cols, trans_datetime))
     # rename the df with new cols name,use rename function with a dict of old column to new column mapping
     ls_colnames_dbinsert = list(map(special_process_col_name,dfm_data.columns))
     ins_str_cols = ','.join(ls_colnames_dbinsert)

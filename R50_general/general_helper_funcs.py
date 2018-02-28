@@ -169,6 +169,8 @@ def dfm_col_type_conversion(dfm:DataFrame,index='',columns= {}, dateformat='%Y-%
     """
     # TODO: for 万股 processing, mulitple 10000 and use bigint type instead.
     def datetime_conversion(x):
+        if isinstance(x,datetime):
+            return x
         if x!= None and x != '--' and x != '' and x!='1900-1-1' and x!='1900-01-01':
             # print(x,type(x))
             return datetime.strptime(x, dateformat)

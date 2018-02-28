@@ -142,8 +142,12 @@ def tick_topd(var,index):
     return ret
 def get_ticks(symbol, begin_time, end_time):
     var = md.get_ticks(symbol, begin_time, end_time)
-    ret = tick_topd(var,'date')
-    return ret
+    if len(var) == 0:
+        print("no ticks data for stock %s between %s and %s" %(symbol, begin_time, end_time))
+        return pd.DataFrame()
+    else:
+        ret = tick_topd(var,'date')
+        return ret
 def bar_topd(var,index):
     ret = []
     z = len(var)
@@ -292,12 +296,14 @@ if __name__ == '__main__':  # sample test for demo
     # 指数中每个股票的权重,有用
     var = get_constituents('SHSE.000001')
     print('please check execl output for ' + '-'*60)
-    var.to_excel("constituents.xlsx")
+    var.to_excel(gcf.get_tmp_file("constituents.xlsx"))
 
     # tick数据,暂时没有,建议先记录入数据库,待将来再用,建议存入一个独立的数据库
-    var = get_ticks("SHSE.600053", begin_date,end_date)
+    begin_date_tick = datetime.datetime.strptime("2018-2-1","%Y-%m-%d")
+    end_date_tick = datetime.datetime.strptime("2018-2-7","%Y-%m-%d")
+    var = get_ticks("SHSE.600000", begin_date_tick,end_date_tick)
     print('please check execl output for get_ticks' + '-'*60)
-    var.to_excel("ticks.xlsx")
+    var.to_excel(gcf.get_tmp_file("ticks.xlsx"))
 
     # 获取交易所的交易日历, return a list
     now = datetime.datetime.now()
