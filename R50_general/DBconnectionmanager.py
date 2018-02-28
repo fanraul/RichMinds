@@ -11,7 +11,7 @@ if hostname in ls_hostname_DEV:
     HF_DB_connection_string = DB_connection_string
 elif hostname in ls_hostname_PRD:
     DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind_PRD'
-    HF_DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind_HF_PRD'
+    HF_DB_connection_string = 'mssql+pyodbc://Richmind:121357468@HF_Richmind_PRD'
 else:
     assert 0==1,'please update the hostname to decide which SQL server to link!'
 
