@@ -454,7 +454,7 @@ def load_dfm_to_db_multi_value_by_mkt_stk_w_hist(market_id, item, dfm_data: Data
 
 def load_dfm_to_db_multi_value_by_key_cols_w_hist(
         dt_key_cols:dict,dfm_data:DataFrame,table_name:str,dict_misc_pars:dict,processing_mode:str,
-        enable_delete,partial_ind,float_fix_decimal,is_HF_conn):
+        enable_delete,partial_ind,float_fix_decimal,is_HF_conn = False):
     # TODO: delete的处理,目前作为inconsistency,看实际的发生情况再做处理
 
     # if hf connection, switch conn to HF SQL server DB
@@ -526,7 +526,7 @@ def load_dfm_to_db_multi_value_by_key_cols_w_hist(
 
         #insert the sub dfm into db
         insert_multi_value_dfm_to_db_by_key_cols_transdate(dt_key_cols, cur_uni_tsdate,sub_dfm_data ,
-                                                               table_name, dict_misc_pars, timestamp)
+                                                               table_name, dict_misc_pars, timestamp,is_HF_conn)
 
     if enable_delete:
         for db_uni_tsdate in set_db_unique_tsdate:
@@ -630,7 +630,11 @@ def load_dfm_to_db_multi_value_by_key_cols_cur(dt_key_cols:dict,dfm_data:DataFra
                                                        table_name, dict_misc_pars, timestamp)
 
 def insert_multi_value_dfm_to_db_by_key_cols_transdate(dt_key_cols:dict,trans_datetime, dfm_data:DataFrame,
-                                                       table_name:str,dict_misc_pars:dict,timestamp):
+                                                       table_name:str,dict_misc_pars:dict,timestamp,
+                                                       is_hf_conn = False):
+
+    if is_hf_conn:
+        conn = hf_conn
 
     ls_key_col_items = dt_key_cols.items()
     ls_key_cols_value = [x[1] for x in ls_key_col_items]       # ['SH','600000']
