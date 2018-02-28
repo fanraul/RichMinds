@@ -2,7 +2,7 @@ from datetime import datetime
 import socket
 # the earliset dailybar date time, in dev, it's currently it is 2014-1-1.
 Global_dailybar_begin_date = datetime(2017,1,1).date()
-Global_dailyticks_begin_datetime = datetime(2018,2,1)
+Global_dailyticks_begin_datetime = datetime(2018,1,1)
 
 hostname = socket.gethostname()
 ls_hostname_PRD = ['iZgaizjy01f4atZ',]
@@ -288,7 +288,6 @@ excluded_dates =['2018-01-01',  # 格式必须是YYYY-MM-DD
                  '2018-02-19',
                  '2018-02-20',
                  '2018-02-21',
-                 '2018-02-22',
                  ]
 
 
