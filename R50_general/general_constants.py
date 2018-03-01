@@ -7,11 +7,15 @@ Global_dailyticks_begin_datetime = datetime(2018,1,1)
 hostname = socket.gethostname()
 ls_hostname_PRD = ['iZgaizjy01f4atZ',]
 ls_hostname_DEV = ['BELLA-MACBUKAIR',]
+ls_hostname_HF_PRD = ['TERRY-X200']
+
 
 if hostname in ls_hostname_DEV:
     host_type = 'DEV'
 elif hostname in ls_hostname_PRD:
     host_type = 'PRD'
+elif hostname in ls_hostname_HF_PRD:
+    host_type = 'HF_PRD'
 else:
     assert 0==1,'please update the hostname into DEV list or PRD list'
 
@@ -21,6 +25,9 @@ if host_type == 'DEV':
 elif host_type == 'PRD':
     futu_api_ip = '127.0.0.1'
     Global_path_news_details_jd = 'D:\\80_Business_docs\\news\\jd\\'
+elif host_type == 'HF_PRD':
+    futu_api_ip = '101.132.98.4'
+    Global_path_news_details_jd = 'C:\\80_Business_docs\\news\\jd\\'
 else:
     assert 0==1,'unknown host type'
 

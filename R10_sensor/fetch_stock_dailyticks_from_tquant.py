@@ -20,7 +20,11 @@ Ticks数据为高频交易数据
 
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
-last_trading_datetime = gcf.get_last_trading_daytime()
+
+# manually set end time for cut-over.
+end_fetch_datetime = gcf.get_last_trading_daytime()
+end_fetch_datetime = datetime(2018,1,31,23,0)
+
 # last_trading_date = last_trading_datetime.date()
 last_fetch_datetime = df2db.get_last_fetch_date(global_module_name)
 
@@ -46,9 +50,9 @@ def fetch2DB(stockid:str):
     # step2.1: get current stock list
     dfm_stocks = df2db.get_cn_stocklist(stockid)
 
-    if last_fetch_datetime and last_fetch_datetime.date() >= last_trading_datetime.date():
-        logprint('No need to fetch dialyticks since last_fetch_date %s is later than or equal to last trading date %s'
-                 %(last_fetch_datetime.date(),last_trading_datetime.date()))
+    if last_fetch_datetime and last_fetch_datetime.date() >= end_fetch_datetime.date():
+        logprint('No need to fetch dialyticks since last_fetch_date %s is later than or equal to end fetch date %s'
+                 % (last_fetch_datetime.date(), end_fetch_datetime.date()))
         return
 
     for index,row in dfm_stocks.iterrows():
@@ -64,7 +68,7 @@ def fetch2DB(stockid:str):
         else:
             begin_time = R50_general.general_constants.Global_dailyticks_begin_datetime
         # try:
-        end_time = last_trading_datetime
+        end_time = end_fetch_datetime
         if begin_time > end_time:
             logprint('No need to fetch stock dailyticks for stockid %s' % row['Stock_ID'], ' due to stock not yet 上市')
             continue
@@ -104,12 +108,12 @@ def fetch2DB(stockid:str):
                                                            is_HF_conn=True)
 
     if stockid =='':
-        df2db.updateDB_last_fetch_date(global_module_name,last_trading_datetime)
+        df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
 
 def auto_reprocess():
     ahf.auto_reprocess_dueto_ipblock(identifier=global_module_name, func_to_call=fetch2DB, wait_seconds=60)
-    logprint('Update last fetch date as %s' % last_trading_datetime)
-    df2db.updateDB_last_fetch_date(global_module_name, last_trading_datetime)
+    logprint('Update last fetch date as %s' % end_fetch_datetime)
+    df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
 
 if __name__ == '__main__':
     # fetch2DB('300692')

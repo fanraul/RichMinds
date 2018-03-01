@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from R50_general.general_constants import ls_hostname_DEV,ls_hostname_PRD
+from R50_general.general_constants import ls_hostname_DEV,ls_hostname_PRD,ls_hostname_HF_PRD
 import socket
 # remote database
 # DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind_Remote'
@@ -13,8 +13,12 @@ elif hostname in ls_hostname_PRD:
     DB_connection_string = 'mssql+pyodbc://Richmind:121357468@richmind@Richmind_PRD'
     # HF_DB_connection_string = 'mssql+pyodbc://Richmind:121357468@HF_Richmind_PRD'
     HF_DB_connection_string = DB_connection_string
+elif hostname in ls_hostname_HF_PRD:
+    DB_connection_string = 'mssql+pyodbc://Richmind:121357468@richmind@Richmind_PRD'
+    HF_DB_connection_string = 'mssql+pyodbc://Richmind:121357468@richmind@RICHMIND_HF_PRD'
 else:
     assert 0==1,'please update the hostname to decide which SQL server to link!'
+
 
 class Dbconnectionmanager:
     def __init__(self, echo=False):
