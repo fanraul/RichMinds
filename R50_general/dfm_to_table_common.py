@@ -454,12 +454,14 @@ def load_dfm_to_db_multi_value_by_mkt_stk_w_hist(market_id, item, dfm_data: Data
 
 def load_dfm_to_db_multi_value_by_key_cols_w_hist(
         dt_key_cols:dict,dfm_data:DataFrame,table_name:str,dict_misc_pars:dict,processing_mode:str,
-        enable_delete,partial_ind,float_fix_decimal,is_HF_conn = False):
+        enable_delete,partial_ind,float_fix_decimal,is_hf_conn = False):
     # TODO: delete的处理,目前作为inconsistency,看实际的发生情况再做处理
 
     # if hf connection, switch conn to HF SQL server DB
-    if is_HF_conn:
-        conn = hf_conn
+    if is_hf_conn:
+        conn_local = hf_conn
+    else:
+        conn_local = conn
 
     # load DB contents
     timestamp = datetime.now()
@@ -478,7 +480,7 @@ def load_dfm_to_db_multi_value_by_key_cols_w_hist(
         oldest_trans_datetime = datetime(1900,1,1)
 
     dfm_db_data = pd.read_sql_query("select * from %s where %s AND Trans_Datetime >= ?" % (table_name, str_sel_key_cols)
-                                    , conn, params=(*ls_key_cols_value,oldest_trans_datetime), index_col='Trans_Datetime')
+                                    , conn_local, params=(*ls_key_cols_value,oldest_trans_datetime), index_col='Trans_Datetime')
 
     set_cur_unique_tsdate = set(dfm_data.index)
     set_db_unique_tsdate = set(dfm_db_data.index)
@@ -516,7 +518,7 @@ def load_dfm_to_db_multi_value_by_key_cols_w_hist(
                 logprint('Delete %s entry %s Period %s' % (table_name, dt_key_cols, cur_uni_tsdate.date()))
                 # print(ins_str)
                 try:
-                    conn.execute(del_str, del_par)
+                    conn_local.execute(del_str, del_par)
                 except:
                     raise
             elif processing_mode == 'wo_update':
@@ -526,7 +528,7 @@ def load_dfm_to_db_multi_value_by_key_cols_w_hist(
 
         #insert the sub dfm into db
         insert_multi_value_dfm_to_db_by_key_cols_transdate(dt_key_cols, cur_uni_tsdate,sub_dfm_data ,
-                                                               table_name, dict_misc_pars, timestamp,is_HF_conn)
+                                                               table_name, dict_misc_pars, timestamp,is_hf_conn)
 
     if enable_delete:
         for db_uni_tsdate in set_db_unique_tsdate:
@@ -634,7 +636,9 @@ def insert_multi_value_dfm_to_db_by_key_cols_transdate(dt_key_cols:dict,trans_da
                                                        is_hf_conn = False):
 
     if is_hf_conn:
-        conn = hf_conn
+        conn_local = hf_conn
+    else:
+        conn_local = conn
 
     ls_key_col_items = dt_key_cols.items()
     ls_key_cols_value = [x[1] for x in ls_key_col_items]       # ['SH','600000']
@@ -659,7 +663,7 @@ def insert_multi_value_dfm_to_db_by_key_cols_transdate(dt_key_cols:dict,trans_da
             table_name,str_key_cols,ins_str_cols,mark_key_cols, ins_str_pars)
         # print(ins_str)
         try:
-            conn.execute(ins_str, ls_ins_pars)
+            conn_local.execute(ins_str, ls_ins_pars)
         except:
             raise
 

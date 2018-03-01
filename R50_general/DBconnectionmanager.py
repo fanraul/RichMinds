@@ -10,7 +10,7 @@ if hostname in ls_hostname_DEV:
     DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind'
     HF_DB_connection_string = DB_connection_string
 elif hostname in ls_hostname_PRD:
-    DB_connection_string = 'mssql+pyodbc://Richmind:121357468@Richmind_PRD'
+    DB_connection_string = 'mssql+pyodbc://Richmind:121357468@richmind@Richmind_PRD'
     # HF_DB_connection_string = 'mssql+pyodbc://Richmind:121357468@HF_Richmind_PRD'
     HF_DB_connection_string = DB_connection_string
 else:
