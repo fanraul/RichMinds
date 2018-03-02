@@ -43,11 +43,10 @@ add one month for buffer, total go-live date: 2018/7/1
   - [ ] category 资金流 *
   - [ ] index 资金流 *
   - [ ] stock news & Announcement *
-  - [ ] stock 资金流 **  ->数据源已找到,参见postman-collection-richmind-key apis-☆ 东方财富_资金流向API
         ![](https://i.imgur.com/zJHzcce.png)
   - [ ] stock 转股(如股票改号码,股票A转成股票B) **
   - [ ] 基金数据 **
-  
+  - [ ] stock 资金流 **  ->数据源已找到,参见postman-collection-richmind-key apis-☆ 东方财富_资金流向API 
         * 有时间就完成
         ** stage1 不需完成,留待stage2 
 + stock overview web page 
