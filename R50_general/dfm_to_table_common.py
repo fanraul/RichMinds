@@ -200,6 +200,8 @@ def create_stock_HF_tables_by_template(general_table_name:str,dfm_stocks:DataFra
     dfm_HF_tables['name'] = dfm_HF_tables.apply(lambda x: general_table_name %(x['Market_ID'] +'.'+x['Stock_ID']),axis=1)
     # gcf.dfmprint(dfm_HF_tables)
     dfm_non_exist_tables = gcf.dfm_A_minus_B(dfm_HF_tables,dfm_table_check,key_cols=['name'])
+    if len(dfm_non_exist_tables) == 0:
+        return
     dfm_non_exist_tables['MtkStk'] = dfm_non_exist_tables['Market_ID'] + '.' + dfm_non_exist_tables['Stock_ID']
     # gcf.dfmprint(dfm_non_exist_tables)
 
