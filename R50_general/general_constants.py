@@ -89,7 +89,7 @@ dbtables = {
     'stock_index_stocks_futuquant':'DD_stock_index_stocks_futuquant',
     'category':'ZCFG_category',
     'stock_category_stocks_futuquant':'DD_stock_category_stocks_futuquant',
-    'stock_dailyticks_Tquant':'HF_stock_dailyticks_Tquant',
+    'stock_dailyticks_Tquant':'HF_%s_dailyticks_Tquant',
 }
 dbtemplate_stock_date = """
 CREATE TABLE [%(table)s](
@@ -212,6 +212,49 @@ CREATE TABLE [%(table)s](
 	[Sqno] ASC
 ))
 """
+
+dbtemplate_HF_dailyticks = """
+CREATE TABLE [%(table)s](
+	[Market_ID] [nvarchar](50) NOT NULL,
+	[Stock_ID] [nvarchar](50) NOT NULL,
+	[Trans_Datetime] [datetime] NOT NULL,
+	[Sqno] [int] NOT NULL,
+	[tick_Datetime] [datetime] NULL,
+	[amount] [decimal](15, 2) NULL,
+	[close] [decimal](8, 2) NULL,
+	[opi] [decimal](8, 2) NULL,
+	[vol] [decimal](15, 2) NULL,
+	[买一价] [decimal](8, 2) NULL,
+	[买一量] [decimal](15, 2) NULL,
+	[卖一价] [decimal](8, 2) NULL,
+	[卖一量] [decimal](15, 2) NULL,
+	[Created_datetime] [datetime] NULL,
+	[Created_by] [nvarchar](50) NULL,
+	[Last_modified_datetime] [datetime] NULL,
+	[Last_modified_by] [nvarchar](50) NULL,
+ CONSTRAINT [PK_%(table)s] PRIMARY KEY
+(
+	[Market_ID] ASC,
+	[Stock_ID] ASC,
+	[Trans_Datetime] ASC,
+	[Sqno] ASC
+))
+"""
+
+sqltemplate_set_compression = """
+ALTER TABLE [%(table)s] REBUILD PARTITION = ALL
+WITH 
+(DATA_COMPRESSION = ROW
+)
+"""
+
+sqltemplate_create_index_by_ticktime = """
+CREATE NONCLUSTERED INDEX [IDX_%(mtkstk)s_Ticktime] ON [%(table)s]
+(
+	[tick_Datetime] ASC
+)
+"""
+
 
 # the job sheduler for background programs
 # key is the program name

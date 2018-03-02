@@ -191,6 +191,37 @@ def create_table_by_template(table_name:str,table_type:str):
         conn.execute(crt_str)
         logprint('Table %s is created' %table_name)
 
+def create_stock_HF_tables_by_template(general_table_name:str,dfm_stocks:DataFrame,table_type:str):
+
+    like_condition = general_table_name %'%'
+    dfm_table_check = pd.read_sql_query(" select name from sys.objects where type = 'U' and name like '%s'" % like_condition.strip(),
+                                        hf_conn)
+    dfm_HF_tables = dfm_stocks[['Market_ID','Stock_ID']]
+    dfm_HF_tables['name'] = dfm_HF_tables.apply(lambda x: general_table_name %(x['Market_ID'] +'.'+x['Stock_ID']),axis=1)
+    # gcf.dfmprint(dfm_HF_tables)
+    dfm_non_exist_tables = gcf.dfm_A_minus_B(dfm_HF_tables,dfm_table_check,key_cols=['name'])
+    dfm_non_exist_tables['MtkStk'] = dfm_non_exist_tables['Market_ID'] + '.' + dfm_non_exist_tables['Stock_ID']
+    # gcf.dfmprint(dfm_non_exist_tables)
+
+    for index,row in dfm_non_exist_tables.iterrows():
+        # print(row)
+        logprint('Creating HF table: %s ...' % row['name'])
+        if table_type == 'daily_ticks':
+            crt_str = R50_general.general_constants.dbtemplate_HF_dailyticks % {'table':row['name']}
+            hf_conn.execute(crt_str)
+            time.sleep(0.2)
+            logprint('Creating additional index...')
+            idx_str = R50_general.general_constants.sqltemplate_create_index_by_ticktime %{'mtkstk':row['MtkStk'],'table':row['name']}
+            hf_conn.execute(idx_str)
+            time.sleep(0.2)
+            logprint('Set table compress type...')
+            comp_str =  R50_general.general_constants.sqltemplate_set_compression % {'table':row['name']}
+            hf_conn.execute(comp_str)
+        else:
+            assert 0==1, 'Non-known table type:%s' %table_type
+
+        logprint('Table %s is created' %row['name'])
+
 def add_new_chars_and_cols(dict_cols_cur:dict,ls_cols_db:list,table_name:str,dict_misc_pars:dict):
     """
     do 2 things:

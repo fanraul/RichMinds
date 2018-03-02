@@ -29,8 +29,7 @@ end_fetch_datetime = datetime(2018,1,31,23,0)
 last_fetch_datetime = df2db.get_last_fetch_date(global_module_name)
 
 def fetch2DB(stockid:str):
-    # init step
-    table_name = R50_general.general_constants.dbtables['stock_dailyticks_Tquant']
+    # 1.1 init step
     dict_misc_pars = {}
     dict_misc_pars['created_by'] = dict_misc_pars['update_by'] = global_module_name
 
@@ -45,10 +44,12 @@ def fetch2DB(stockid:str):
                      '卖一量': 'decimal(15,2)',
                     }
 
-    # for HF trans data, DB is created before, no db structure adjustment in program
-
     # step2.1: get current stock list
     dfm_stocks = df2db.get_cn_stocklist(stockid)
+
+    # for HF trans data, each stock has its own table, so first make sure all tables are created.
+    general_table_name = R50_general.general_constants.dbtables['stock_dailyticks_Tquant']
+    df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='daily_ticks')
 
     if last_fetch_datetime and last_fetch_datetime.date() >= end_fetch_datetime.date():
         logprint('No need to fetch dialyticks since last_fetch_date %s is later than or equal to end fetch date %s'
@@ -57,7 +58,9 @@ def fetch2DB(stockid:str):
 
     for index,row in dfm_stocks.iterrows():
         runtime_start = datetime.now()
+        table_name = general_table_name %(row['Market_ID'] +'.'+row['Stock_ID'])
         logprint('Processing stock %s' %row['Stock_ID'])
+
         mt_stockid = row['Tquant_symbol_ID']
         if last_fetch_datetime:
             begin_time = last_fetch_datetime
@@ -118,5 +121,5 @@ def auto_reprocess():
     df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
 
 if __name__ == '__main__':
-    # fetch2DB('300692')
-    auto_reprocess()
+    fetch2DB('300692')
+    # auto_reprocess()
