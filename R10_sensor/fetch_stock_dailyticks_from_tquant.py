@@ -56,6 +56,7 @@ def fetch2DB(stockid:str):
         return
 
     for index,row in dfm_stocks.iterrows():
+        runtime_start = datetime.now()
         logprint('Processing stock %s' %row['Stock_ID'])
         mt_stockid = row['Tquant_symbol_ID']
         if last_fetch_datetime:
@@ -106,7 +107,8 @@ def fetch2DB(stockid:str):
                                                            float_fix_decimal =2,
                                                            partial_ind=True,
                                                            is_HF_conn=True)
-
+        runtime_delta = datetime.now() -runtime_start
+        logprint("fetch %s ticks data from %s to %s takes: %s minutes" %(row['Stock_ID'],begin_time,end_time,runtime_delta.total_seconds()/60))
     if stockid =='':
         df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
 

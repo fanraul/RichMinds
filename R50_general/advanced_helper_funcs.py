@@ -120,9 +120,9 @@ def func_call_with_trace(func_name,*func_args,dt_args_w_name = {},program_name:s
     func_name(*func_args,**dt_args_w_name)
     end_time = datetime.now()
     time_spent = end_time-start_time
-    logprint('*********  End function call %s.%s, time spent: %d seconds  *************' % (program_name,
+    logprint('*********  End function call %s.%s, time spent: %d minutes  *************' % (program_name,
                                                                                             func_name.__name__,
-                                                                                            time_spent.total_seconds()))
+                                                                                            time_spent.total_seconds()/60))
 
 if __name__ == '__main__':
     print(getweekday())
