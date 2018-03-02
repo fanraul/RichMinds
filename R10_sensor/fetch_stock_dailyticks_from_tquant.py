@@ -58,7 +58,8 @@ def fetch2DB(stockid:str):
 
     for index,row in dfm_stocks.iterrows():
         runtime_start = datetime.now()
-        table_name = general_table_name %(row['Market_ID'] +'.'+row['Stock_ID'])
+        api_time = 0
+        table_name = general_table_name %(row['Market_ID'] +row['Stock_ID'])
         logprint('Processing stock %s' %row['Stock_ID'])
 
         mt_stockid = row['Tquant_symbol_ID']
@@ -82,7 +83,10 @@ def fetch2DB(stockid:str):
         begin_time_tmp = begin_time
         for i in range(delta_days+1):
             end_time_tmp = begin_time_tmp + timedelta(days = 1)
+            api_starttime = datetime.now()
             dfm_tick_day = mt.get_ticks(mt_stockid,begin_time = begin_time_tmp,end_time=end_time_tmp)
+            api_endtime = datetime.now()
+            api_time +=(api_endtime-api_starttime).total_seconds()
             begin_time_tmp = end_time_tmp
             if len(dfm_tick_day) > 0:
                 ls_ticks_info.append(dfm_tick_day)
@@ -102,6 +106,7 @@ def fetch2DB(stockid:str):
 
         gcf.dfm_col_type_conversion(dfm_ticks, columns=dict_cols_cur)
         # gcf.dfmprint(dfm_stk_info)
+        db_starttime = datetime.now()
         df2db.load_dfm_to_db_multi_value_by_mkt_stk_w_hist(row['Market_ID'],
                                                            row['Stock_ID'],
                                                            dfm_ticks,
@@ -110,8 +115,11 @@ def fetch2DB(stockid:str):
                                                            float_fix_decimal =2,
                                                            partial_ind=True,
                                                            is_HF_conn=True)
+        db_endtime = datetime.now()
+        db_time = (db_endtime-db_starttime).total_seconds()
         runtime_delta = datetime.now() -runtime_start
-        logprint("fetch %s ticks data from %s to %s takes: %s minutes" %(row['Stock_ID'],begin_time,end_time,runtime_delta.total_seconds()/60))
+        logprint("fetch %s ticks data from %s to %s takes: total %s minutes; api %s minutes; db %s minutes"
+                 %(row['Stock_ID'],begin_time,end_time,runtime_delta.total_seconds()/60,api_time/60,db_time/60))
     if stockid =='':
         df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
 
@@ -121,5 +129,5 @@ def auto_reprocess():
     df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
 
 if __name__ == '__main__':
-    fetch2DB('300692')
-    # auto_reprocess()
+    # fetch2DB('300692')
+    auto_reprocess()
