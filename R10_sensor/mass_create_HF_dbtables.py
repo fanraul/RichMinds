@@ -12,6 +12,7 @@ import R50_general.advanced_helper_funcs as ahf
 
 '''
 批量基于股票代码生成HF的transaction tables
+在HF的数据抽取前,运行本程序保证所有表都已建立.
 '''
 
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)

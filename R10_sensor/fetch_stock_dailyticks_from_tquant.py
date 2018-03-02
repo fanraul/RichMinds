@@ -47,9 +47,9 @@ def fetch2DB(stockid:str):
     # step2.1: get current stock list
     dfm_stocks = df2db.get_cn_stocklist(stockid)
 
-    # for HF trans data, each stock has its own table, so first make sure all tables are created.
+    # for HF trans data, tables should be created by mass_create_HF_dbtables program.
     general_table_name = R50_general.general_constants.dbtables['stock_dailyticks_Tquant']
-    df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='daily_ticks')
+    # df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='daily_ticks')
 
     if last_fetch_datetime and last_fetch_datetime.date() >= end_fetch_datetime.date():
         logprint('No need to fetch dialyticks since last_fetch_date %s is later than or equal to end fetch date %s'
