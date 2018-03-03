@@ -219,6 +219,30 @@ def create_stock_HF_tables_by_template(general_table_name:str,dfm_stocks:DataFra
             logprint('Set table compress type...')
             comp_str =  R50_general.general_constants.sqltemplate_set_compression % {'table':row['name']}
             hf_conn.execute(comp_str)
+
+        elif table_type == '1minbar_futu':
+            crt_str = R50_general.general_constants.dbtemplate_HF_1minbar_futu % {'table':row['name']}
+            hf_conn.execute(crt_str)
+            time.sleep(0.2)
+            # logprint('Creating additional index...')
+            # idx_str = R50_general.general_constants.sqltemplate_create_index_by_ticktime %{'mtkstk':row['MtkStk'],'table':row['name']}
+            # hf_conn.execute(idx_str)
+            # time.sleep(0.2)
+            logprint('Set table compress type...')
+            comp_str =  R50_general.general_constants.sqltemplate_set_compression % {'table':row['name']}
+            hf_conn.execute(comp_str)
+
+        elif table_type == '1minbar_Tquant':
+            crt_str = R50_general.general_constants.dbtemplate_HF_1minbar_Tquant % {'table':row['name']}
+            hf_conn.execute(crt_str)
+            time.sleep(0.2)
+            # logprint('Creating additional index...')
+            # idx_str = R50_general.general_constants.sqltemplate_create_index_by_ticktime %{'mtkstk':row['MtkStk'],'table':row['name']}
+            # hf_conn.execute(idx_str)
+            # time.sleep(0.2)
+            logprint('Set table compress type...')
+            comp_str =  R50_general.general_constants.sqltemplate_set_compression % {'table':row['name']}
+            hf_conn.execute(comp_str)
         else:
             assert 0==1, 'Non-known table type:%s' %table_type
 

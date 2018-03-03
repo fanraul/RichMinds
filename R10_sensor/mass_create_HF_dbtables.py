@@ -18,20 +18,29 @@ import R50_general.advanced_helper_funcs as ahf
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 
-def mass_create_cnstock_dailyticks_tables(dfm_stocks ):
+def mass_create_cnstock_dailyticks_Tquant_tables(dfm_stocks ):
     # for HF trans data, each stock has its own table, so first make sure all tables are created.
     general_table_name = R50_general.general_constants.dbtables['stock_dailyticks_Tquant']
     df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='daily_ticks')
 
-def mass_create_cnstock_1minbar_tables( dfm_stocks):
+def mass_create_cnstock_1minbar_futuquant_tables(dfm_stocks):
+    # for HF trans data, each stock has its own table, so first make sure all tables are created.
+    general_table_name = R50_general.general_constants.dbtables['stock_1minbar_futuquant']
+    df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='1minbar_futu')
+
+
+def mass_create_cnstock_1minbar_Tquant_tables(dfm_stocks):
     # for HF trans data, each stock has its own table, so first make sure all tables are created.
     general_table_name = R50_general.general_constants.dbtables['stock_1minbar_Tquant']
-    df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='1minbar')
+    df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='1minbar_Tquant')
 
 def mass_dbtables_creation():
     # step2.1: get current stock list
     dfm_stocks = df2db.get_cn_stocklist('')
-    mass_create_cnstock_dailyticks_tables(dfm_stocks)
+    mass_create_cnstock_dailyticks_Tquant_tables(dfm_stocks)
+    mass_create_cnstock_1minbar_futuquant_tables(dfm_stocks)
+    mass_create_cnstock_1minbar_Tquant_tables(dfm_stocks)
+
 
 if __name__ == '__main__':
     mass_dbtables_creation()

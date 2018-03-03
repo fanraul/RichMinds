@@ -90,6 +90,8 @@ dbtables = {
     'category':'ZCFG_category',
     'stock_category_stocks_futuquant':'DD_stock_category_stocks_futuquant',
     'stock_dailyticks_Tquant':'HF_%s_dailyticks_Tquant',
+    'stock_1minbar_futuquant': 'HF_%s_1minbar_futuquant',
+    'stock_1minbar_Tquant': 'HF_%s_1minbar_Tquant',
 }
 dbtemplate_stock_date = """
 CREATE TABLE [%(table)s](
@@ -238,6 +240,53 @@ CREATE TABLE [%(table)s](
 	[Stock_ID] ASC,
 	[Trans_Datetime] ASC,
 	[Sqno] ASC
+))
+"""
+
+dbtemplate_HF_1minbar_futu = """
+CREATE TABLE [%(table)s](
+	[Market_ID] [nvarchar](50) NOT NULL,
+	[Stock_ID] [nvarchar](50) NOT NULL,
+	[Trans_Datetime] [datetime] NOT NULL,
+	[open] [decimal](12, 4) NULL,
+	[close] [decimal](12, 4) NULL,
+	[high] [decimal](12, 4) NULL,
+	[low] [decimal](12, 4) NULL,
+	[vol] [decimal](15, 2) NULL,
+	[amount] [decimal](15, 2) NULL,
+	[PCHG] [decimal](12, 4) NULL,
+	[Created_datetime] [datetime] NULL,
+	[Created_by] [nvarchar](50) NULL,
+	[Last_modified_datetime] [datetime] NULL,
+	[Last_modified_by] [nvarchar](50) NULL,
+ CONSTRAINT [PK_%(table)s] PRIMARY KEY
+(
+	[Market_ID] ASC,
+	[Stock_ID] ASC,
+	[Trans_Datetime] ASC
+))
+"""
+
+dbtemplate_HF_1minbar_Tquant = """
+CREATE TABLE [%(table)s](
+	[Market_ID] [nvarchar](50) NOT NULL,
+	[Stock_ID] [nvarchar](50) NOT NULL,
+	[Trans_Datetime] [datetime] NOT NULL,
+	[open] [decimal](12, 4) NULL,
+	[close] [decimal](12, 4) NULL,
+	[high] [decimal](12, 4) NULL,
+	[low] [decimal](12, 4) NULL,
+	[vol] [decimal](15, 2) NULL,
+	[amount] [decimal](15, 2) NULL,
+	[Created_datetime] [datetime] NULL,
+	[Created_by] [nvarchar](50) NULL,
+	[Last_modified_datetime] [datetime] NULL,
+	[Last_modified_by] [nvarchar](50) NULL,
+ CONSTRAINT [PK_%(table)s] PRIMARY KEY
+(
+	[Market_ID] ASC,
+	[Stock_ID] ASC,
+	[Trans_Datetime] ASC
 ))
 """
 
