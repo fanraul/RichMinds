@@ -3,6 +3,7 @@ import socket
 # the earliset dailybar date time, in dev, it's currently it is 2014-1-1.
 Global_dailybar_begin_date = datetime(2017,1,1).date()
 Global_dailyticks_begin_datetime = datetime(2018,1,1)
+Global_1minbar_begin_datetime = datetime(2017,2,1)
 
 hostname = socket.gethostname()
 ls_hostname_PRD = ['iZgaizjy01f4atZ',]

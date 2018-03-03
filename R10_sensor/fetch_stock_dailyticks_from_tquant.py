@@ -15,7 +15,7 @@ import R90_tquant.myquant as mt
 
 '''
 Ticks数据为高频交易数据
-此数据源当天不会更新当天的数据,本交易日只能获得昨日数据,故不建议每日更新,而是每周日更新.
+此数据源当天实时更新.
 '''
 
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)

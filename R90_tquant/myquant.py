@@ -227,91 +227,91 @@ if __name__ == '__main__':  # sample test for demo
     # var = get_ticks("SHSE.600000", "2018-2-8 09:30:00",
     #                            "2018-2-8 15:00:00")
     # # var = get_shse()
-    begin_date = datetime.datetime.strptime("2018-2-4","%Y-%m-%d")
-    end_date = datetime.datetime.strptime("2018-2-15","%Y-%m-%d")
+    begin_date = datetime.datetime.strptime("2017-2-1","%Y-%m-%d")
+    end_date = datetime.datetime.strptime("2018-3-3","%Y-%m-%d")
 
     symbol_list = ['SHSE.600100', 'SHSE.600000', 'SHSE.600030', 'SZSE.000002', 'SZSE.300124']
-    symbol = 'SHSE.600053'
+    symbol = 'SHSE.600000'
     n =10
     bar_type = 15*60 #15mins
 
-    var = get_last_ticks(symbol_list)
-    print('result of get_last_ticks' + '-'*60)
-    gcf.dfmprint(var)
-
-    var = get_last_n_ticks(symbol, n)
-    print('result of get_last_n_ticks' + '-'*60)
-    gcf.dfmprint(var)
-
-    var = get_last_bars(symbol_list, bar_type)
-    print('result of get_last_bars' + '-'*60)
-    gcf.dfmprint(var)
-
-    var = get_last_n_bars(symbol, bar_type, n)
-    print('result of get_last_n_bars' + '-'*60)
-    gcf.dfmprint(var)
-
-    var = get_last_dailybars(symbol_list)
-    print('result of get_last_dailybars' + '-'*60)
-    gcf.dfmprint(var)
-
-    var = get_last_n_dailybars(symbol, n)
-    print('result of get_last_n_dailybars' + '-'*60)
-    gcf.dfmprint(var)
-
-    # os._exit(0)
-
-    #Tquant的dailybar
-    var = get_dailybars("SHSE.600547", begin_date, end_date)
-    print('result of get_dailybars' + '-'*60)
-    gcf.dfmprint(var)
+    # var = get_last_ticks(symbol_list)
+    # print('result of get_last_ticks' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # var = get_last_n_ticks(symbol, n)
+    # print('result of get_last_n_ticks' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # var = get_last_bars(symbol_list, bar_type)
+    # print('result of get_last_bars' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # var = get_last_n_bars(symbol, bar_type, n)
+    # print('result of get_last_n_bars' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # var = get_last_dailybars(symbol_list)
+    # print('result of get_last_dailybars' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # var = get_last_n_dailybars(symbol, n)
+    # print('result of get_last_n_dailybars' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # # os._exit(0)
+    #
+    # #Tquant的dailybar
+    # var = get_dailybars("SHSE.600547", begin_date, end_date)
+    # print('result of get_dailybars' + '-'*60)
+    # gcf.dfmprint(var)
 
     #Tquant的self-defined bar
-    var = get_bars("SHSE.600547", 60*60, begin_date, end_date)
+    var = get_bars("SHSE.600000", 1*60, begin_date, end_date)
     print('result of get_bars' + '-'*60)
-    gcf.dfmprint(var)
-
-    var = get_stock_adj('SZSE.300088',begin_date,end_date)
-    print('result of stock adjustment' + '-'*60)
-    gcf.dfmprint(var)
-
-    begin_date1 = datetime.datetime.strptime("2012-3-4","%Y-%m-%d")
-    var = get_dividend('SHSE.600547',begin_date1,end_date)
-    print('result of divident' + '-'*60)
-    gcf.dfmprint(var)
-
-    # os._exit(0)
-
-    # 财务基本指标
-    begin_date1 = datetime.datetime.strptime("2017-3-4","%Y-%m-%d")
-    var = get_financial_index("SHSE.600000",begin_date1,end_date)
-    print('result of get_financial_index' + '-'*60)
-    print(var)
-
-    # market index是每天的市盈率和市净率数据,建议集成到Tquant的stockdailybar中一次性写入dailybar的表中
-    var = get_market_index("SHSE.600000", begin_date, end_date)
-    print('result of get_market_index' + '-'*60)
-    gcf.dfmprint(var)
-
-    # 指数中每个股票的权重,有用
-    var = get_constituents('SHSE.000001')
-    print('please check execl output for ' + '-'*60)
-    var.to_excel(gcf.get_tmp_file("constituents.xlsx"))
-
-    # tick数据,暂时没有,建议先记录入数据库,待将来再用,建议存入一个独立的数据库
-    begin_date_tick = datetime.datetime.strptime("2018-2-1","%Y-%m-%d")
-    end_date_tick = datetime.datetime.strptime("2018-2-7","%Y-%m-%d")
-    var = get_ticks("SHSE.600000", begin_date_tick,end_date_tick)
-    print('please check execl output for get_ticks' + '-'*60)
-    var.to_excel(gcf.get_tmp_file("ticks.xlsx"))
-
-    # 获取交易所的交易日历, return a list
-    now = datetime.datetime.now()
-    begin_date1 = now - datetime.timedelta(days=10)  # 当前日期-10天
-    end_date1 = now + datetime.timedelta(days=10)  # 当前日期+10天
-    var = get_calendar('SHSE', begin_date1,end_date1)
-    print('result of get_calendar' + '-'*60)
-    gcf.print_list_nice(var)
+    # gcf.dfmprint(var)
+    var.to_excel(gcf.get_tmp_file('600000_1min_myquant.xlsx'))
+    # var = get_stock_adj('SZSE.300088',begin_date,end_date)
+    # print('result of stock adjustment' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # begin_date1 = datetime.datetime.strptime("2012-3-4","%Y-%m-%d")
+    # var = get_dividend('SHSE.600547',begin_date1,end_date)
+    # print('result of divident' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # # os._exit(0)
+    #
+    # # 财务基本指标
+    # begin_date1 = datetime.datetime.strptime("2017-3-4","%Y-%m-%d")
+    # var = get_financial_index("SHSE.600000",begin_date1,end_date)
+    # print('result of get_financial_index' + '-'*60)
+    # print(var)
+    #
+    # # market index是每天的市盈率和市净率数据,建议集成到Tquant的stockdailybar中一次性写入dailybar的表中
+    # var = get_market_index("SHSE.600000", begin_date, end_date)
+    # print('result of get_market_index' + '-'*60)
+    # gcf.dfmprint(var)
+    #
+    # # 指数中每个股票的权重,有用
+    # var = get_constituents('SHSE.000001')
+    # print('please check execl output for ' + '-'*60)
+    # var.to_excel(gcf.get_tmp_file("constituents.xlsx"))
+    #
+    # # tick数据,暂时没有,建议先记录入数据库,待将来再用,建议存入一个独立的数据库
+    # begin_date_tick = datetime.datetime.strptime("2018-2-1","%Y-%m-%d")
+    # end_date_tick = datetime.datetime.strptime("2018-2-7","%Y-%m-%d")
+    # var = get_ticks("SHSE.600000", begin_date_tick,end_date_tick)
+    # print('please check execl output for get_ticks' + '-'*60)
+    # var.to_excel(gcf.get_tmp_file("ticks.xlsx"))
+    #
+    # # 获取交易所的交易日历, return a list
+    # now = datetime.datetime.now()
+    # begin_date1 = now - datetime.timedelta(days=10)  # 当前日期-10天
+    # end_date1 = now + datetime.timedelta(days=10)  # 当前日期+10天
+    # var = get_calendar('SHSE', begin_date1,end_date1)
+    # print('result of get_calendar' + '-'*60)
+    # gcf.print_list_nice(var)
 
     #
 
