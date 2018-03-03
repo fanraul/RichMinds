@@ -307,7 +307,7 @@ def add_new_chars_and_cols(dict_cols_cur:dict,ls_cols_db:list,table_name:str,dic
 
 def load_dfm_to_db_single_value_by_mkt_stk_w_hist(market_id, item, dfm_data:DataFrame, table_name:str, dict_misc_pars:dict,
                                                   processing_mode:str = 'w_update',enable_delete = True,partial_ind = False,
-                                                  float_fix_decimal = 4):
+                                                  float_fix_decimal = 4,is_HF_conn = False):
     """
     本函数用于单值属性的char的历史数据更新.
     本函数只支持单值类型的chars的表更新,如果char是多值的,请用load_dfm_to_db_multi_value_by_mkt_stk_w_hist(尚未开发)
@@ -333,15 +333,16 @@ def load_dfm_to_db_single_value_by_mkt_stk_w_hist(market_id, item, dfm_data:Data
                         then we consider two float is the same.
     :return:
     """
+
     # load DB contents
     dt_key_cols = {'Market_ID':market_id,'Stock_ID':item}
 
     load_dfm_to_db_single_value_by_key_cols_w_hist(
-        dt_key_cols, dfm_data, table_name, dict_misc_pars, processing_mode,enable_delete,partial_ind,float_fix_decimal)
+        dt_key_cols, dfm_data, table_name, dict_misc_pars, processing_mode,enable_delete,partial_ind,float_fix_decimal,is_HF_conn)
 
 
 def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:DataFrame,table_name:str,dict_misc_pars:dict,
-                                                   processing_mode:str,enable_delete,partial_ind,float_fix_decimal):
+                                                   processing_mode:str,enable_delete,partial_ind,float_fix_decimal,is_HF_conn = False):
     """
     本函数用于单值属性的char的历史数据更新.
     每组关键字需调用一次本函数,即如果要更新100行数据(100个不同的key值),需要调用100次本函数,本程序每次处理一行.
@@ -364,6 +365,11 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
     # load DB contents
     timestamp = datetime.now()
 
+    if is_HF_conn:
+        conn_tmp = hf_conn
+    else:
+        conn_tmp = conn
+
     ls_key_col_items = dt_key_cols.items()
     ls_sel_key_cols = [ x[0] + ' = ?' for x in ls_key_col_items]
     ls_sel_key_cols_value = [x[1] for x in ls_key_col_items]
@@ -377,7 +383,7 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
     else:
         oldest_trans_datetime = datetime(1900,1,1)
     dfm_db_data = pd.read_sql_query("select * from %s where %s AND Trans_Datetime >= ?" %(table_name,str_sel_key_cols)
-                                        , conn, params=(*ls_sel_key_cols_value,oldest_trans_datetime), index_col='Trans_Datetime')
+                                        , conn_tmp, params=(*ls_sel_key_cols_value,oldest_trans_datetime), index_col='Trans_Datetime')
 
     # gcf.dfmprint(dfm_db_data)
     # gcf.dfmprint(dfm_data)
@@ -426,7 +432,7 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
 
                     update_str = '''UPDATE %s SET %s 
                         WHERE %s AND Trans_Datetime = ? ''' %(table_name,upt_str,str_sel_key_cols )
-                    conn.execute(update_str, tuple(ls_upt_pars))
+                    conn_tmp.execute(update_str, tuple(ls_upt_pars))
             elif processing_mode == 'wo_update':
                 continue
             else:
@@ -453,7 +459,7 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
         # print(ins_str)
         try:
             for ins_par in ls_ins_pars:
-                conn.execute(ins_str, ins_par)
+                conn_tmp.execute(ins_str, ins_par)
             # conn.execute(ins_str, ls_ins_pars)
         except:
             raise
