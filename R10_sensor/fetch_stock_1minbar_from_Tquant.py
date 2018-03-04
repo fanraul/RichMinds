@@ -108,7 +108,7 @@ def fetch2DB(stockid:str):
         df2db.load_dfm_to_db_single_value_by_mkt_stk_w_hist(row['Market_ID'], row['Stock_ID'], dfm_bars, table_name,
                                                             dict_misc_pars,
                                                             processing_mode='w_update', float_fix_decimal=2,
-                                                            partial_ind=True)
+                                                            partial_ind=True,is_HF_conn=True)
         db_endtime = datetime.now()
         db_time = (db_endtime-db_starttime).total_seconds()
         runtime_delta = datetime.now() -runtime_start

@@ -175,8 +175,12 @@ def bar_topd(var,index):
     return ret
 def get_bars(symbol, bar_type, begin_time, end_time):
     var = md.get_bars(symbol, bar_type, begin_time, end_time)
-    ret = bar_topd(var,'date')
-    return ret
+    if len(var) == 0:
+        print("no bar data for stock %s between %s and %s" %(symbol, begin_time, end_time))
+        return pd.DataFrame()
+    else:
+        ret = bar_topd(var,'date')
+        return ret
 def get_dailybars(symbol, begin_time, end_time):
     var = md.get_dailybars(symbol, begin_time, end_time)
     ret = bar_topd(var,'date')
