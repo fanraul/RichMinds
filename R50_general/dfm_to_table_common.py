@@ -439,7 +439,8 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
                 assert 0 == 1,'processing_mode %s unkown, please double check!' %processing_mode
             continue
         # insert logic
-        logprint('Insert %s %s Period %s' % (table_name,dt_key_cols, ts_id))
+        if not is_HF_conn:
+            logprint('Insert %s %s Period %s' % (table_name,dt_key_cols, ts_id))
         # rename the df with new cols name,use rename function with a dict of old column to new column mapping
         ls_colnames_dbinsert = list(map(special_process_col_name,dfm_data.columns))
         ins_str_cols = ','.join(ls_colnames_dbinsert)
