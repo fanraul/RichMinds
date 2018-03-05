@@ -458,12 +458,17 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
         ins_str = '''INSERT INTO %s (%s,Trans_Datetime,Created_datetime,Created_by,%s) VALUES (?,?,?,?,?,%s)''' % (
             table_name,str_key_cols,ins_str_cols, ins_str_pars)
         # print(ins_str)
-        try:
-            for ins_par in ls_ins_pars:
+        for ins_par in ls_ins_pars:
+            try:
                 conn_tmp.execute(ins_str, ins_par)
             # conn.execute(ins_str, ls_ins_pars)
-        except:
-            raise
+            except:
+                if is_HF_conn:
+                    logprint('HF DB update failed, the SQL statement of failed entry is:', ins_str,ins_par,add_log_files='I')
+                    continue
+                else:
+                    raise
+
 
     # handle delete case
     if enable_delete:
