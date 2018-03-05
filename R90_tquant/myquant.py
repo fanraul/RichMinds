@@ -271,10 +271,12 @@ if __name__ == '__main__':  # sample test for demo
     # gcf.dfmprint(var)
 
     #Tquant的self-defined bar
-    var = get_bars("SHSE.600000", 1*60, begin_date, end_date)
+    begin_date=datetime.datetime(2017,8,1,14,40)
+    end_date = datetime.datetime(2017,8,1,14,50)
+    var = get_bars("SHSE.600112", 1*60, begin_date, end_date)
     print('result of get_bars' + '-'*60)
-    # gcf.dfmprint(var)
-    var.to_excel(gcf.get_tmp_file('600000_1min_myquant.xlsx'))
+    gcf.dfmprint(var)
+    # var.to_excel(gcf.get_tmp_file('600000_1min_myquant.xlsx'))
     # var = get_stock_adj('SZSE.300088',begin_date,end_date)
     # print('result of stock adjustment' + '-'*60)
     # gcf.dfmprint(var)

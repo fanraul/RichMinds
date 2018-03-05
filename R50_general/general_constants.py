@@ -1,7 +1,7 @@
 from datetime import datetime
 import socket
 # the earliset dailybar date time, in dev, it's currently it is 2014-1-1.
-Global_dailybar_begin_date = datetime(2017,1,1).date()
+Global_dailybar_begin_date = datetime(2005,1,1).date()
 Global_dailyticks_begin_datetime = datetime(2018,1,1)
 Global_1minbar_begin_datetime = datetime(2017,2,1)
 
@@ -81,6 +81,7 @@ dbtables = {
     'stock_company_issuance_info_eastmoney':'DD_stock_company_issuance_info_eastmoney',
     'stock_dividend_cninfo':'DD_stock_dividend_cninfo',
     'stock_dailybar_tquant': 'DD_stock_dailybar_Tquant',
+    'stock_dailybar_futuquant':'DD_stock_dailybar_futuquant',
     'stock_fhsp_sina': 'DD_stock_fhsp_sina',  # TODO
     'stock_fhsp_eastmoney': 'DD_stock_fhsp_eastmoney',    # TODO
     'stock_dailybar_netease':'DD_stock_dailybar_netease',

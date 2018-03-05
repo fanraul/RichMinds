@@ -9,8 +9,9 @@ from R50_general.general_helper_funcs import logprint
 import R50_general.general_helper_funcs as gcf
 import R50_general.dfm_to_table_common as df2db
 import R50_general.advanced_helper_funcs as ahf
-
-import R90_tquant.myquant as mt
+from futuquant.open_context import *
+from R50_general.general_constants import futu_api_ip as api_ip
+from R50_general.general_constants import futu_api_port as api_port
 
 '''
 1mins数据为高频交易数据
@@ -20,7 +21,7 @@ import R90_tquant.myquant as mt
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 end_fetch_datetime = gcf.get_last_trading_daytime()
-end_fetch_datetime = datetime(2017,3,2)
+end_fetch_datetime = datetime(2018,3,2)
 # last_trading_date = last_trading_datetime.date()
 last_fetch_datetime = df2db.get_last_fetch_date(global_module_name)
 
@@ -35,21 +36,22 @@ def fetch2DB(stockid:str):
                      'open': 'decimal(8,2)',
                      'vol':'decimal(15,2)',
                      'amount': 'decimal(15,2)',
+                     'PCHG': 'decimal(12, 4)',
                     }
 
     # step2.1: get current stock list
     dfm_stocks = df2db.get_cn_stocklist(stockid)
 
     # for HF trans data, tables should be created by mass_create_HF_dbtables program.
-    general_table_name = R50_general.general_constants.dbtables['stock_1minbar_Tquant']
+    general_table_name = R50_general.general_constants.dbtables['stock_1minbar_futuquant']
     # df2db.create_stock_HF_tables_by_template(general_table_name, dfm_stocks, table_type='daily_ticks')
 
     if last_fetch_datetime and last_fetch_datetime.date() >= end_fetch_datetime.date():
         logprint('No need to fetch 1minbar since last_fetch_date %s is later than or equal to end fetch date %s'
                  % (last_fetch_datetime.date(), end_fetch_datetime.date()))
         return
-
-
+    # buildup connection with futuquant server
+    quote_ctx = OpenQuoteContext(api_ip, api_port)
 
     for index,row in dfm_stocks.iterrows():
         runtime_start = datetime.now()
@@ -57,7 +59,7 @@ def fetch2DB(stockid:str):
         table_name = general_table_name %(row['Market_ID'] +row['Stock_ID'])
         logprint('Processing stock %s' %row['Stock_ID'])
 
-        mt_stockid = row['Tquant_symbol_ID']
+        mtkstk_id = row['Market_ID'] + '.' + row['Stock_ID']
         if last_fetch_datetime:
             begin_time = last_fetch_datetime
         elif not row['上市日期']:
@@ -73,48 +75,58 @@ def fetch2DB(stockid:str):
             logprint('No need to fetch stock 1minbar for stockid %s' % row['Stock_ID'], ' due to stock not yet 上市')
             continue
 
+        logprint('fetch %s data from %s to %s:' % (mtkstk_id,begin_time, end_time))
+        api_starttime = datetime.now()
+        ret,dfm_bars = quote_ctx.get_history_kline(mtkstk_id,
+                                                   start=begin_time.strftime('%Y-%m-%d'),
+                                                   end=end_time.strftime('%Y-%m-%d'),
+                                                   ktype='K_1M',
+                                                   autype=None)
+        api_time+=(datetime.now() - api_starttime).seconds
 
-        # delta_days = (end_time-begin_time).days
-        # ls_ticks_info =[]
-        # begin_time_tmp = begin_time
-        # for i in range(delta_days+1):
-        #     end_time_tmp = begin_time_tmp + timedelta(days = 1)
-        #     api_starttime = datetime.now()
-        #     dfm_tick_day = mt.get_ticks(mt_stockid,begin_time = begin_time_tmp,end_time=end_time_tmp)
-        #     api_endtime = datetime.now()
-        #     api_time +=(api_endtime-api_starttime).total_seconds()
-        #     begin_time_tmp = end_time_tmp
-        #     if len(dfm_tick_day) > 0:
-        #         ls_ticks_info.append(dfm_tick_day)
+        if ret == RET_ERROR:
+            assert 0 == 1, 'Error during fetch %s 1minbar , error message: %s' % (mtkstk_id, dfm_bars)
 
-        ls_1minbar_info,api_time = call_api_by_interval(mt_stockid, begin_time, end_time, 30)
-
-        if len(ls_1minbar_info) > 0:
-            dfm_bars = pd.concat(ls_1minbar_info)
-        else:
-            logprint('No stock 1minbar can be found for stockid %s' %row['Stock_ID'], ' after tquant api fetch.')
+        if len(dfm_bars) == 0:
+            logprint('No stock 1minbar can be found for stockid %s' %row['Stock_ID'], ' after futuquant api fetch.')
             continue
 
         # step2: format raw data into prop data type
         # gcf.dfmprint(dfm_bars)
-        # dfm_bars['Trans_Datetime'] = dfm_bars.index
-        del dfm_bars['code']
-        del dfm_bars['adj']
+        # dfm_bars.to_excel(gcf.get_tmp_file('futu_%s-1minbar_raw.xlsx' %stockid))
+        # futu kline API 返回值会有重复记录,需用drop_plicate函数进行去重处理
+        dfm_bars.drop_duplicates(['time_key','low','high','open','close','volume','turnover'],inplace=True)
 
-        # dfm_bars.to_excel(gcf.get_tmp_file('%s-ticks.xlsx' %stockid))
+        dfm_bars['Trans_Datetime'] = dfm_bars.apply(lambda s: datetime.strptime(s['time_key'],'%Y-%m-%d %H:%M:%S'),axis=1)
+
+        dfm_bars.rename(columns = {'change_rate':'PCHG',
+                                   'volume':'vol',
+                                   'turnover':'amount'},inplace=True)
+        dfm_bars.set_index('Trans_Datetime',inplace=True)
+
+        del dfm_bars['time_key']
+        del dfm_bars['code']
+        del dfm_bars['pe_ratio']
+        del dfm_bars['turnover_rate']
 
         gcf.dfm_col_type_conversion(dfm_bars, columns=dict_cols_cur)
+
+        # dfm_bars.to_excel(gcf.get_tmp_file('futu_%s-1minbar.xlsx' %stockid))
+
         # gcf.dfmprint(dfm_stk_info)
         db_starttime = datetime.now()
         df2db.load_dfm_to_db_single_value_by_mkt_stk_w_hist(row['Market_ID'], row['Stock_ID'], dfm_bars, table_name,
                                                             dict_misc_pars,
-                                                            processing_mode='w_update', float_fix_decimal=2,
+                                                            processing_mode='w_update', float_fix_decimal=4,
                                                             partial_ind=True,is_HF_conn=True)
         db_endtime = datetime.now()
         db_time = (db_endtime-db_starttime).total_seconds()
         runtime_delta = datetime.now() -runtime_start
         logprint("fetch %s 1minbar data from %s to %s takes: total %s minutes; api %s minutes; db %s minutes"
                  %(row['Stock_ID'],begin_time,end_time,runtime_delta.total_seconds()/60,api_time/60,db_time/60))
+
+    quote_ctx.close()
+
     if stockid =='':
         df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
 
@@ -122,39 +134,6 @@ def auto_reprocess():
     ahf.auto_reprocess_dueto_ipblock(identifier=global_module_name, func_to_call=fetch2DB, wait_seconds=60)
     logprint('Update last fetch date as %s' % end_fetch_datetime)
     df2db.updateDB_last_fetch_date(global_module_name, end_fetch_datetime)
-
-def call_api_by_interval(mt_stockid,begin_time,end_time,days_interval):
-    """
-    由于每个api返回值最多是30000行,所以当取数的时间间隔过大时,会有数据遗漏,所以可以设置一个days_interval,比如20天,则将一个大的取数时间
-    分为多个20天的小间隔进行取数,从而保证不会出现一次返回数据量过大导致遗漏的问题.
-    :param begin_time:
-    :param end_time:
-    :param days_interval:
-    :return:
-    """
-    delta_days = (end_time - begin_time).days
-    interval_times = delta_days // days_interval
-
-    ls_data_info = []
-    begin_time_tmp = begin_time
-    api_time = 0
-
-    for i in range(interval_times +1):
-        if i == interval_times:
-            end_time_tmp = end_time
-        else:
-            end_time_tmp = begin_time_tmp + timedelta(days=days_interval)
-        logprint('fetch data from %s to %s:' %(begin_time_tmp,end_time_tmp))
-        api_starttime = datetime.now()
-        dfm_1minbar = mt.get_bars(mt_stockid, 1 * 60, begin_time_tmp, end_time_tmp)
-        api_endtime = datetime.now()
-        api_time += (api_endtime - api_starttime).total_seconds()
-        begin_time_tmp = end_time_tmp
-        if len(dfm_1minbar) > 0:
-            ls_data_info.append(dfm_1minbar)
-
-    return ls_data_info,api_time
-
 
 if __name__ == '__main__':
     # fetch2DB('600000')

@@ -233,6 +233,42 @@ def dfmprint(*args, sep=' ',  end='\n',  file=None):
     pd.set_option('display.precision',8)
     print(*args, sep=' ',  end='\n',  file=None)
 
+def determine_time_period_to_fetch_per_stock(mtkstk_id,last_fetch_datetime,first_issue_date,end_fetch_datetime,data_type):
+    """
+    return a tuple, (is_fetch_required,begin_time,end_time), is_fetch_required = Ture means data need to fetch.
+                    false means no need to fetch.
+    :param mtkstk_id:
+    :param last_fetch_datetime:
+    :param first_issue_date:
+    :param end_fetch_datetime:
+    :return:
+    """
+    if data_type == '1minbar':
+        global_begin_datetime = gc.Global_1minbar_begin_datetime
+    elif data_type == 'dailybar':
+        global_begin_datetime = datetime.strptime(str(gc.Global_dailybar_begin_date) + ' 00:00', '%Y-%m-%d %H:%M')
+    elif data_type == 'ticks':
+        global_begin_datetime = gc.Global_dailyticks_begin_datetime
+    else:
+        assert 0==1, 'unknown data_type to fetch, no way to determine the begin and end datetime.'
+
+    if last_fetch_datetime:
+        begin_time = last_fetch_datetime
+    elif not first_issue_date:
+        logprint('No need to fetch stock transdata for stockid %s' % mtkstk_id, ' due to stock has no 上市日期')
+        return False,None,None
+    elif first_issue_date.date() > global_begin_datetime.date():
+        begin_time = first_issue_date
+    else:
+        begin_time = global_begin_datetime
+
+    end_time = end_fetch_datetime
+    if begin_time > end_time:
+        logprint('No need to fetch stock 1minbar for stockid %s' % mtkstk_id, ' due to stock 上市日期大于end_fetch_datetime')
+        return False,None,None
+
+    return True,begin_time,end_time
+
 def isStrNumber(s:str):
     if s.isdigit():
         return True
@@ -363,8 +399,18 @@ def get_last_trading_day(market_id:str='SH'):
     return last_trading_day.date()
 
 def get_last_trading_daytime(market_id:str='SH'):
+    """
+    return the end datetime for last trading day , if today, add actual datetime of today; else add '23:59:00'
+    :param market_id:
+    :return:
+    """
     last_trading_day = get_last_trading_day(market_id)
-    last_trading_daytime = datetime.strptime(str(last_trading_day), '%Y-%m-%d')
+    now = datetime.now().date()
+    if last_trading_day == now:
+        now_time = now.strftime('%H:%M')
+        last_trading_daytime = datetime.strptime(str(last_trading_day) + ' ' + now_time, '%Y-%m-%d %H:%M')
+    else:
+        last_trading_daytime = datetime.strptime(str(last_trading_day) + ' 23:59', '%Y-%m-%d %H:%M')
     return last_trading_daytime
 
 def get_trading_days_futuquant(market, start_date=None, end_date=None):
