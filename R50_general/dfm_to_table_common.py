@@ -8,6 +8,7 @@ import numpy as np
 import R50_general.general_helper_funcs as gcf
 from datetime import datetime
 import time
+import re
 
 #initial steps:
 # step1: get DB connection
@@ -307,7 +308,7 @@ def add_new_chars_and_cols(dict_cols_cur:dict,ls_cols_db:list,table_name:str,dic
 
 def load_dfm_to_db_single_value_by_mkt_stk_w_hist(market_id, item, dfm_data:DataFrame, table_name:str, dict_misc_pars:dict,
                                                   processing_mode:str = 'w_update',enable_delete = True,partial_ind = False,
-                                                  float_fix_decimal = 4,is_HF_conn = False):
+                                                  float_fix_decimal = 4,is_HF_conn = False,dict_cols_cur = None):
     """
     本函数用于单值属性的char的历史数据更新.
     本函数只支持单值类型的chars的表更新,如果char是多值的,请用load_dfm_to_db_multi_value_by_mkt_stk_w_hist(尚未开发)
@@ -338,11 +339,12 @@ def load_dfm_to_db_single_value_by_mkt_stk_w_hist(market_id, item, dfm_data:Data
     dt_key_cols = {'Market_ID':market_id,'Stock_ID':item}
 
     load_dfm_to_db_single_value_by_key_cols_w_hist(
-        dt_key_cols, dfm_data, table_name, dict_misc_pars, processing_mode,enable_delete,partial_ind,float_fix_decimal,is_HF_conn)
+        dt_key_cols, dfm_data, table_name, dict_misc_pars, processing_mode,enable_delete,partial_ind,float_fix_decimal,is_HF_conn,dict_cols_cur)
 
 
 def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:DataFrame,table_name:str,dict_misc_pars:dict,
-                                                   processing_mode:str,enable_delete,partial_ind,float_fix_decimal,is_HF_conn = False):
+                                                   processing_mode:str,enable_delete,partial_ind,float_fix_decimal,
+                                                   is_HF_conn = False,dict_cols_cur =None):
     """
     本函数用于单值属性的char的历史数据更新.
     每组关键字需调用一次本函数,即如果要更新100行数据(100个不同的key值),需要调用100次本函数,本程序每次处理一行.
@@ -400,6 +402,14 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
                 for col in dfm_data.columns:
                     # dfm_data的列名有可能带[],但是dataframe从sql server中读出时的列名是都不带[],所以要把[]去掉,再进行数据比较.
                     tmp_colname = col.replace('[', '').replace(']', '')
+                    if dict_cols_cur and tmp_colname in dict_cols_cur.keys:
+                        col_format = dict_cols_cur[tmp_colname]
+                        if 'decimal' in col_format:
+                            float_decimal = int(re.findall('.*?,([0-9]*?)\)', col_format)[0])
+                        else:
+                            float_decimal = float_fix_decimal
+                    else:
+                        float_decimal = float_fix_decimal
                     if tmp_colname in dfm_db_data.columns:
                         # 如果两种是空值,只是None的类型不同,不处理.
                         # print('hello',dfm_data.loc[ts_id][col],',', dfm_db_data.loc[ts_id][tmp_colname])
@@ -409,12 +419,12 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
                             # print(dfm_data.loc[ts_id][col],type(dfm_data.loc[ts_id][col]))
                             # print(dfm_db_data.loc[ts_id][tmp_colname],type(dfm_db_data.loc[ts_id][tmp_colname]))
                             #if numpy.float64 then it is possible the value has slight difference,so change rule to allow dif <0.0001
-                            dif = 1./10**float_fix_decimal
+                            dif = 1./10**float_decimal
                             try:
                                 dif = abs(dfm_data.loc[ts_id][col]- dfm_db_data.loc[ts_id][tmp_colname])
                             except:
                                 dif = 1
-                            if isinstance(dif, Timedelta) or dif >= 1. / 10**float_fix_decimal:
+                            if isinstance(dif, Timedelta) or dif >= 1. / 10**float_decimal:
                                 ls_upt_cols.append(special_process_col_name(tmp_colname) + '=?')
                                 # convert numpy type to stanard data type if required.
                                 ls_upt_pars.append(pandas_numpy_type_convert_to_standard(dfm_data.loc[ts_id][col]))

@@ -49,7 +49,7 @@ def fetch2DB(stockid:str):
                      'vol':'decimal(15,2)',
                      'amount': 'decimal(15,2)',
                      'PCHG':'decimal(10, 4)',
-                     'pe_ratio':'decimal(10, 4)',
+                     'pe_ratio':'decimal(15, 4)',
                      'turnover_rate':'decimal(10, 4)',
                      }
     df2db.add_new_chars_and_cols(dict_cols_cur, list(dfm_db_chars['Char_ID']), table_name, dict_misc_pars)
@@ -83,10 +83,12 @@ def fetch2DB(stockid:str):
                                                     start=begin_time.strftime('%Y-%m-%d'),
                                                     end=end_time.strftime('%Y-%m-%d'),
                                                     ktype='K_DAY',
-                                                    autype=None)
+                                                    autype=None,
+                                                    )
 
         if ret == RET_ERROR:
-            assert 0 == 1, 'Error during fetch %s dailybar , error message: %s' % (mtkstk_id, dfm_bars)
+            logprint('Error during fetch %s dailybar , error message: %s' % (mtkstk_id, dfm_bars), add_log_files='I')
+            continue
 
         if len(dfm_bars) == 0:
             logprint('No stock dailybars can be found for stockid %s' %row['Stock_ID'])
@@ -111,7 +113,11 @@ def fetch2DB(stockid:str):
         # gcf.dfmprint(dfm_stk_info)
         df2db.load_dfm_to_db_single_value_by_mkt_stk_w_hist(row['Market_ID'], row['Stock_ID'], dfm_bars, table_name,
                                                             dict_misc_pars,
-                                                            processing_mode='w_update',float_fix_decimal=4,partial_ind= True)
+                                                            processing_mode='w_update',float_fix_decimal=4,
+                                                            partial_ind= True,
+                                                            dict_cols_cur=dict_cols_cur)
+
+    quote_ctx.close()
 
     if stockid =='':
         # if run fetch2DB directly , this codes works
