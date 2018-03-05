@@ -402,10 +402,10 @@ def load_dfm_to_db_single_value_by_key_cols_w_hist(dt_key_cols:dict,dfm_data:Dat
                 for col in dfm_data.columns:
                     # dfm_data的列名有可能带[],但是dataframe从sql server中读出时的列名是都不带[],所以要把[]去掉,再进行数据比较.
                     tmp_colname = col.replace('[', '').replace(']', '')
-                    if dict_cols_cur and tmp_colname in dict_cols_cur.keys:
+                    if dict_cols_cur and tmp_colname in list(dict_cols_cur.keys()):
                         col_format = dict_cols_cur[tmp_colname]
                         if 'decimal' in col_format:
-                            float_decimal = int(re.findall('.*?,([0-9]*?)\)', col_format)[0])
+                            float_decimal = int(re.findall('.*?,.*?([0-9]*?)\)', col_format)[0])
                         else:
                             float_decimal = float_fix_decimal
                     else:
