@@ -181,11 +181,11 @@ def check_cn_dailybars(stockid):
 
 if __name__ == '__main__':
     # check_cn_dailybars('600000')
-    # check_cn_dailybars('600%')
-    # check_cn_dailybars('601%')
-    # check_cn_dailybars('602%')
-    # check_cn_dailybars('603%')
-    # check_cn_dailybars('9%')
+    check_cn_dailybars('600%')
+    check_cn_dailybars('601%')
+    check_cn_dailybars('602%')
+    check_cn_dailybars('603%')
+    check_cn_dailybars('9%')
     check_cn_dailybars('001%')
     check_cn_dailybars('002%')
     check_cn_dailybars('000%')
