@@ -20,7 +20,7 @@ import R90_tquant.myquant as mt
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 end_fetch_datetime = gcf.get_last_trading_daytime()
-end_fetch_datetime = datetime(2017,3,2)
+end_fetch_datetime = datetime(2018,3,2)
 # last_trading_date = last_trading_datetime.date()
 last_fetch_datetime = df2db.get_last_fetch_date(global_module_name)
 
