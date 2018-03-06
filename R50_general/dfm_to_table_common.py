@@ -48,7 +48,7 @@ def get_cn_stocklist(stock :str ="", ls_excluded_stockids=[]) -> DataFrame:
                                             from BD_L1_00_cn_stock_code_list
                                                 where  (Market_ID = 'SH' or Market_ID = 'SZ')  
                                                 and sec_type = '1'
-                                                    ''' + "and Stock_ID = '%s'" %stock
+                                                    ''' + "and Stock_ID LIKE '%s'" %stock
                                        , conn)
     return dfm_stocks
 
@@ -106,12 +106,17 @@ def exec_store_procedure(conn, proc_name, params):
     # gcf.dfmprint(df)
     return dfm_resultset
 
-def get_data_from_DB(table_name, dfm_conditions=DataFrame(), oper_dfm = 'AND', free_conditions :str ="") -> DataFrame:
+def get_data_from_DB(table_name, dfm_conditions=DataFrame(), oper_dfm = 'AND', free_conditions :str ="", alter_conn = None) -> DataFrame:
     """
     dfm_conditions: dfm structure,  db_col-> col name, db_oper-> operater (=,>,<,like etc.), db_val->condition value,
     free_conditions: any condition sentence
     return: dataframe of results
     """
+    if alter_conn:
+        conn_tmp = alter_conn
+    else:
+        conn_tmp = conn
+
     ls_dfm_cond = []
     str_dfm_cond = ''
     if len(dfm_conditions) > 0:
@@ -123,20 +128,20 @@ def get_data_from_DB(table_name, dfm_conditions=DataFrame(), oper_dfm = 'AND', f
     if str_dfm_cond:
         if free_conditions:
             dfm_data = pd.read_sql_query('select * from %s where %s' %(table_name,str_dfm_cond + ' AND '+free_conditions)
-                                   , conn)
+                                   , conn_tmp)
             return dfm_data
         else:
             dfm_data = pd.read_sql_query('select * from %s where %s' %(table_name,str_dfm_cond)
-                                   , conn)
+                                   , conn_tmp)
             return dfm_data
     else:
         if free_conditions:
             dfm_data = pd.read_sql_query('select * from %s where %s' %(table_name,free_conditions)
-                                   , conn)
+                                   , conn_tmp)
             return dfm_data
         else:
             dfm_data = pd.read_sql_query('select * from %s' %table_name
-                                   , conn)
+                                   , conn_tmp)
             return dfm_data
 
 
