@@ -75,14 +75,19 @@ def check_bar(mtk_id,stk_id,ls_tradingdates,table1,table2,dt_cols):
         elif s['Merge_type'] == 'right_only':
             return 'entry not %s, in %s' %(suffix1,suffix2)
 
+        str_diff = 'DIFF:'
         for col in dt_cols.keys():
             col1 = col+'_%s' %(suffix1)
             col2 = col+'_%s' %(suffix2)
             rule = dt_cols[col]
             is_equal,msg = check_col_rule(s[col1],s[col2],rule)
             if not is_equal:
-                return 'DIFF:%s (%s)' %(col,msg)
-        return 'SAME'
+                str_diff += '%s(%s);' %(col,msg)
+
+        if str_diff == 'DIFF:':
+            return 'SAME'
+        else:
+            return str_diff
 
     if len(dfm_check) == 0:
         return DataFrame()
@@ -143,7 +148,7 @@ def check_cn_dailybars(stockid):
     dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,netease_bars,dfm_stocks,dt_cols_tquant_netease)
 
     if len(dfm_checkresults) > 0:
-        dfm_checkresults.to_excel(get_tmp_file('%s_Tquant_vs_netease_dailybars_check_result %s.xlsx' %(stockid,now)))
+        dfm_checkresults.to_excel(get_tmp_file('%s_%s_Tquant_vs_netease_dailybars_check_result.xlsx' %(now,stockid)))
     else:
         logprint('There is no difference for (%s)_Tquant_vs_netease_dailybars'%stockid)
 
@@ -158,7 +163,7 @@ def check_cn_dailybars(stockid):
     dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,futu_bars,dfm_stocks,dt_cols_tquant_futuquant)
 
     if len(dfm_checkresults) > 0:
-        dfm_checkresults.to_excel(get_tmp_file('%s_Tquant_vs_futuquant_dailybars_check_result %s.xlsx' %(stockid,now)))
+        dfm_checkresults.to_excel(get_tmp_file('%s_%s_Tquant_vs_futuquant_dailybars_check_result.xlsx' %(now,stockid)))
     else:
         logprint('There is no difference for (%s)_Tquant_vs_futuquant_dailybars'%stockid)
 
@@ -174,19 +179,19 @@ def check_cn_dailybars(stockid):
     dfm_checkresults = check_bars(ls_trading_dates,netease_bars,futu_bars,dfm_stocks,dt_cols_netease_futuquant)
 
     if len(dfm_checkresults) > 0:
-        dfm_checkresults.to_excel(get_tmp_file('%s_netease_vs_futuquant_dailybars_check_result %s.xlsx' %(stockid,now)))
+        dfm_checkresults.to_excel(get_tmp_file('%s_%s_netease_vs_futuquant_dailybars_check_result.xlsx' %(now,stockid)))
     else:
         logprint('There is no difference for (%s)_netease_vs_futuquant_dailybars'%stockid)
 
 
 if __name__ == '__main__':
     # check_cn_dailybars('600000')
-    check_cn_dailybars('600%')
-    check_cn_dailybars('601%')
-    check_cn_dailybars('602%')
-    check_cn_dailybars('603%')
-    check_cn_dailybars('9%')
-    check_cn_dailybars('001%')
+    # check_cn_dailybars('001%')
+    # check_cn_dailybars('600%')
+    # check_cn_dailybars('601%')
+    # check_cn_dailybars('602%')
+    # check_cn_dailybars('603%')
+    # check_cn_dailybars('9%')
     check_cn_dailybars('002%')
     check_cn_dailybars('000%')
     check_cn_dailybars('2%')
