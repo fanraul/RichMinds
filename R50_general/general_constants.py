@@ -94,6 +94,8 @@ dbtables = {
     'stock_dailyticks_Tquant':'HF_%s_dailyticks_Tquant',
     'stock_1minbar_futuquant': 'HF_%s_1minbar_futuquant',
     'stock_1minbar_Tquant': 'HF_%s_1minbar_Tquant',
+    'stock_adjinfo_futuquant':'DD_stock_adjinfo_futuquant',
+    'stock_allotment_cninfo':'DD_stock_allotment_cninfo',
 }
 dbtemplate_stock_date = """
 CREATE TABLE [%(table)s](

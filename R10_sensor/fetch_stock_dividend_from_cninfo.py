@@ -17,7 +17,7 @@ import R50_general.dfm_to_table_common as df2db
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 
-#use Tquant module to get the data, the datasource of Tquant is cninfo.
+# 程序有解析方案和处理同一天多条分红信息的功能,顾不使用Tquant的函数获得分红信息,保持原有的处理方式.
 def fetch2DB(stockid:str = ''):
 
     # init step
@@ -103,7 +103,7 @@ def soup_parse_stock_dividend(soup):
                  dt_fhsp['方案文本解析错误标识位']) = parse_dividend_txt_to_number(dt_fhsp['分红方案'])
 
                 ls_fhsp.append(dt_fhsp)
-                ls_index.append(datetime.strptime(dt_fhsp['股权登记日'], '%Y%m%d'))
+                ls_index.append(datetime.strptime(dt_fhsp['除权基准日'], '%Y%m%d'))
 
         return DataFrame(ls_fhsp,index = ls_index)
     else:
@@ -185,6 +185,6 @@ def auto_reprocess():
     ahf.auto_reprocess_dueto_ipblock(identifier=global_module_name, func_to_call= fetch2DB, wait_seconds= 20)
 
 if __name__ == '__main__':
-    fetch2DB('000002')
-    # fetch2DB()
+    # fetch2DB('000002')
+    fetch2DB()
     # auto_reprocess()

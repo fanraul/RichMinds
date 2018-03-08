@@ -61,7 +61,7 @@ def parse_concept(tmp_soup,cate_type:str):
     tmp_category = ''
     for item in ls_tmp_category:
         if len(item) != 2:
-            raise
+            assert 0==1,''
         tmp_category = item[1]
         tmp_title = re.findall('title="(.*?)"',item[0])
         if len(tmp_title) == 1:
