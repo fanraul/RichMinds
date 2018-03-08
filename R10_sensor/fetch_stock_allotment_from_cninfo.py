@@ -10,7 +10,7 @@ import gc
 import R50_general.advanced_helper_funcs as ahf
 import R50_general.general_constants
 import R50_general.general_helper_funcs as gcf
-from R50_general.general_helper_funcs import logprint
+from R50_general.general_helper_funcs import logprint,get_tmp_file
 import R50_general.dfm_to_table_common as df2db
 
 import R90_tquant.getdata as tt
@@ -50,6 +50,7 @@ def fetch2DB(stockid:str = ''):
     # step2.1: get current stock list
     dfm_stocks = df2db.get_cn_stocklist(stockid)
     # print(dfm_stocks)
+
     for index,row in dfm_stocks.iterrows():
         logprint('Processing stock %s' %row['Stock_ID'])
         # url_stock_info = R50_general.general_constants.weblinks['stock_dividend_cninfo'] %{'market_id':gcf.market_id_conversion_for_cninfo(row['Stock_ID']),
@@ -68,16 +69,25 @@ def fetch2DB(stockid:str = ''):
         # dfm_stk_info = soup_parse_stock_dividend(soup_stock_info)
 
 
+        try:
+            # 直接使用Tquant的函数
+            dfm_allot = tt.get_allotment(row['Stock_ID'])
+        # special handing for this webpage!!!
+        # cninfo will raise error 404 if no dividend information exist for certain stock, need capture it and skip this stock
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                logprint('No stock allotment details can be found for stockid %s' % row['Stock_ID'])
+                continue
+            else:
+                raise e
 
-        # 直接使用Tquant的函数
-        dfm_allot = tt.get_allotment(row['Stock_ID'])
 
         # TODO: error handling
         if len(dfm_allot) == 0:
             logprint('No stock allotment details can be found for stockid %s' %row['Stock_ID'])
-            return
+            continue
 
-        dfm_allot_formated = format_stock_allotment(dfm_allot)
+        dfm_allot_formated = format_stock_allotment(dfm_allot,row['Stock_ID'])
 
         # step2: format raw data into prop data type
         # gcf.dfmprint(dfm_stk_info)
@@ -91,14 +101,17 @@ def fetch2DB(stockid:str = ''):
                                                             dict_misc_pars,float_fix_decimal=8,
                                                             processing_mode='w_update')
 
-def format_stock_allotment(dfm_allot):
+
+def format_stock_allotment(dfm_allot,stock_id):
     ls_dfm_allot = []
     ls_index = []
     for index, row in dfm_allot.iterrows():
+        # print(row['股权登记日'])
         dt_allot = {}
-        dt_allot['股权登记日'] = row['股权登记日'].strip()
+        dt_allot['股权登记日'] = row['股权登记日'].strip() if row['股权登记日'].strip() !='' else '19000101'
+        # print('--:',dt_allot['股权登记日'])
         dt_allot['配股交款起止日'] = row['配股交款起止日'].strip()
-        dt_allot['配股价'] = float(row['配股价'].strip())
+        dt_allot['配股价'] = float(row['配股价'].strip()) if row['配股价'].strip() != '' else None
         dt_allot['除权基准日'] = row['除权基准日'].strip()
         dt_allot['配股可流通部分上市日'] = row['配股可流通部分上市日'].strip()
         dt_allot['配股年度'] = row['配股年度'].strip()
@@ -107,37 +120,17 @@ def format_stock_allotment(dfm_allot):
          dt_allot['方案文本解析错误标识位']) = parse_allotment_txt_to_number(row['配股方案'].strip())
 
         ls_dfm_allot.append(dt_allot)
+        # set table key Trans_Datetime as 除权基准日,but one stockid 600601 has one line with no 除权基准日,
+        # need special process
+        if dt_allot['除权基准日'] == '':
+            if stock_id == '600601' and dt_allot['配股年度'] =='1991年度':
+                dt_allot['除权基准日'] = '19920604'
+                dt_allot['股权登记日'] = '19920603'
+                dt_allot['配股可流通部分上市日'] = '19920610'
         ls_index.append(datetime.strptime(dt_allot['除权基准日'], '%Y%m%d'))
 
     return DataFrame(ls_dfm_allot,index = ls_index)
 
-# def soup_parse_stock_dividend(soup):
-#     tags_table = soup.findAll('table')
-#     if len(tags_table) >= 3:
-#         tags_fhsp = (tags_table[2]).findAll('tr')
-#
-#         ls_fhsp = []
-#         ls_index = []
-#         for tag_fhsp in tags_fhsp[1:]:
-#             content_fhsp = tag_fhsp.findAll('td')
-#             if content_fhsp[1].string.strip():
-#                 dt_fhsp = {}
-#                 dt_fhsp['分红年度'] = content_fhsp[0].string.strip()
-#                 dt_fhsp['分红方案'] = special_rule_for_exceptional_dividend_txt(content_fhsp[1].string.strip())
-#                 dt_fhsp['股权登记日'] = content_fhsp[2].string.strip()
-#                 dt_fhsp['除权基准日'] = content_fhsp[3].string.strip()
-#                 dt_fhsp['红股上市日'] = content_fhsp[4].string.strip()
-#                 (dt_fhsp['送股(股)/10股'],
-#                  dt_fhsp['转增(股)/10股'] ,
-#                  dt_fhsp['派息(税前)(元)/10股'],
-#                  dt_fhsp['方案文本解析错误标识位']) = parse_dividend_txt_to_number(dt_fhsp['分红方案'])
-#
-#                 ls_fhsp.append(dt_fhsp)
-#                 ls_index.append(datetime.strptime(dt_fhsp['除权基准日'], '%Y%m%d'))
-#
-#         return DataFrame(ls_fhsp,index = ls_index)
-#     else:
-#         return DataFrame()
 
 '''
 配股年度	配股方案	配股价	股权登记日	除权基准日	配股交款起止日	配股可流通部分上市日
@@ -209,6 +202,6 @@ def auto_reprocess():
     ahf.auto_reprocess_dueto_ipblock(identifier=global_module_name, func_to_call= fetch2DB, wait_seconds= 20)
 
 if __name__ == '__main__':
-    # fetch2DB('000002')
-    fetch2DB()
-    # auto_reprocess()
+    # fetch2DB('600601')
+    # fetch2DB('')
+    auto_reprocess()

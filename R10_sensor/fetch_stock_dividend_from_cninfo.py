@@ -18,6 +18,10 @@ global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 
 # 程序有解析方案和处理同一天多条分红信息的功能,顾不使用Tquant的函数获得分红信息,保持原有的处理方式.
+# program use 股权登记日 as key due to some stocks fh doesn't have 除权基准日 info,maybe wrong record need to fix
+# to simplily scrap the web and loaded into DB, use 股权登记日 as key can ealisy avoid this problem,
+# before use, user need to double check the  除权基准日 and fix it if required.
+
 def fetch2DB(stockid:str = ''):
 
     # init step
@@ -57,7 +61,7 @@ def fetch2DB(stockid:str = ''):
         # print(url_link)
         try:
            soup_stock_info = gcf.get_webpage(url_stock_info)
-
+        # special handing for this webpage!!!
         # cninfo will raise error 404 if no dividend information exist for certain stock, need capture it and skip this stock
         except urllib.error.HTTPError as e:
             if e.code == 404:
@@ -103,7 +107,7 @@ def soup_parse_stock_dividend(soup):
                  dt_fhsp['方案文本解析错误标识位']) = parse_dividend_txt_to_number(dt_fhsp['分红方案'])
 
                 ls_fhsp.append(dt_fhsp)
-                ls_index.append(datetime.strptime(dt_fhsp['除权基准日'], '%Y%m%d'))
+                ls_index.append(datetime.strptime(dt_fhsp['股权登记日'], '%Y%m%d'))
 
         return DataFrame(ls_fhsp,index = ls_index)
     else:
@@ -186,5 +190,5 @@ def auto_reprocess():
 
 if __name__ == '__main__':
     # fetch2DB('000002')
-    fetch2DB()
-    # auto_reprocess()
+    # fetch2DB()
+    auto_reprocess()

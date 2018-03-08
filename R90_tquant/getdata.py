@@ -263,9 +263,14 @@ def get_allotment(hy):#配股
     for i in range(1,k):
         y={}
         for j in range(0,7):
-            y[var[j]] = var[i * 7 + j].lstrip()
-        ret.append(y)
-    ret = pd.DataFrame(ret)
+            y[var[j]] = var[i * 7 + j].strip()
+        # Terry added to remove the blank lines in the webpage
+        if ''.join(list(y.values())) !='':
+            ret.append(y)
+    if len(ret) > 0:
+        ret = pd.DataFrame(ret)
+    else:
+        ret = pd.DataFrame()
     return ret
 
 def _fhdate():
@@ -1295,24 +1300,25 @@ if __name__  =='__main__':
     # os._exit(0)
 
 
-    var = get_tick_history('600053','20180205')
-    gcf.dfmprint(var)
-    var.to_excel(gcf.get_tmp_file('ticks_600053_20180205.xlsx'))
+    # var = get_tick_history('600053','20180205')
+    # gcf.dfmprint(var)
+    # var.to_excel(gcf.get_tmp_file('ticks_600053_20180205.xlsx'))
+    #
+    # var2 = var.groupby(['close']).sum()
+    # gcf.dfmprint(var2)
+    # os._exit(0)
+    #
+    # var = get_tfp('2018-2-12')
+    # gcf.dfmprint(var)
+    #
+    # os._exit(0)
+    dfm_allot = get_allotment('600349')
+    gcf.dfmprint(dfm_allot)
 
-    var2 = var.groupby(['close']).sum()
-    gcf.dfmprint(var2)
-    os._exit(0)
-
-    var = get_tfp('2018-2-12')
-    gcf.dfmprint(var)
-
-    os._exit(0)
-
-
-    var = get_ipo()
-    gcf.dfmprint(var)
-
-    var = get_brief(['600100','600000','600030','000002','300314'])
-    gcf.dfmprint(var)
+    # var = get_ipo()
+    # gcf.dfmprint(var)
+    #
+    # var = get_brief(['600100','600000','600030','000002','300314'])
+    # gcf.dfmprint(var)
     pass
 
