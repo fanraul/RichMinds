@@ -23,7 +23,7 @@ global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 # manually set end time for cut-over.
 end_fetch_datetime = gcf.get_last_trading_daytime()
-end_fetch_datetime = datetime(2018,1,31,23,0)
+end_fetch_datetime = datetime(2018,2,28,23,0)
 
 # last_trading_date = last_trading_datetime.date()
 last_fetch_datetime = df2db.get_last_fetch_date(global_module_name)

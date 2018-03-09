@@ -1141,7 +1141,7 @@ def get_last_fetch_date(program_name:str, format ='datetime'):
 
     if len(dfm_last_fetch_day) == 0:
         return None
-    elif format == 'detetime':
+    elif format == 'datetime':
         return dfm_last_fetch_day.iloc[0]['last_fetch_date']
     elif format == 'date':
         return dfm_last_fetch_day.iloc[0]['last_fetch_date'].date()

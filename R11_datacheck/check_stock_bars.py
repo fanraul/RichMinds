@@ -145,12 +145,12 @@ def check_cn_dailybars(stockid):
                               'vol':(2,3),      #(2,3) means float compare equal at thounsands, 1000 is the same as 1499.
                               'amount':(2,4)
                              }
-    dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,netease_bars,dfm_stocks,dt_cols_tquant_netease)
-
-    if len(dfm_checkresults) > 0:
-        dfm_checkresults.to_excel(get_tmp_file('%s_%s_Tquant_vs_netease_dailybars_check_result.xlsx' %(now,stockid)))
-    else:
-        logprint('There is no difference for (%s)_Tquant_vs_netease_dailybars'%stockid)
+    # dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,netease_bars,dfm_stocks,dt_cols_tquant_netease)
+    #
+    # if len(dfm_checkresults) > 0:
+    #     dfm_checkresults.to_excel(get_tmp_file('%s_%s_Tquant_vs_netease_dailybars_check_result.xlsx' %(now,stockid)))
+    # else:
+    #     logprint('There is no difference for (%s)_Tquant_vs_netease_dailybars'%stockid)
 
     # Tquant vs futuquant
     dt_cols_tquant_futuquant = {'open': (1,2),    #(1,2) means float compare equal in 2 decimal
@@ -160,12 +160,12 @@ def check_cn_dailybars(stockid):
                               'vol':(2,3),      #(2,3) means float compare equal at thounsands, 1000 is the same as 1499.
                               'amount':(2,4)
                                }
-    dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,futu_bars,dfm_stocks,dt_cols_tquant_futuquant)
-
-    if len(dfm_checkresults) > 0:
-        dfm_checkresults.to_excel(get_tmp_file('%s_%s_Tquant_vs_futuquant_dailybars_check_result.xlsx' %(now,stockid)))
-    else:
-        logprint('There is no difference for (%s)_Tquant_vs_futuquant_dailybars'%stockid)
+    # dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,futu_bars,dfm_stocks,dt_cols_tquant_futuquant)
+    #
+    # if len(dfm_checkresults) > 0:
+    #     dfm_checkresults.to_excel(get_tmp_file('%s_%s_Tquant_vs_futuquant_dailybars_check_result.xlsx' %(now,stockid)))
+    # else:
+    #     logprint('There is no difference for (%s)_Tquant_vs_futuquant_dailybars'%stockid)
 
     # netease vs futuquant
     dt_cols_netease_futuquant = {'open': (1,2),    #(1,2) means float compare equal in 2 decimal
@@ -192,8 +192,8 @@ if __name__ == '__main__':
     # check_cn_dailybars('602%')
     # check_cn_dailybars('603%')
     # check_cn_dailybars('9%')
-    check_cn_dailybars('002%')
+    # check_cn_dailybars('002%')
+    # check_cn_dailybars('2%')
+    # check_cn_dailybars('3%')
     check_cn_dailybars('000%')
-    check_cn_dailybars('2%')
-    check_cn_dailybars('3%')
 
