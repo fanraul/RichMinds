@@ -6,8 +6,49 @@ TODO:
 5. 对应高频数据,初始化需要花费大量时间,待初始化完成后,需确认后续增量数据的处理方式,目前想,主要还是手工每月或每周直接执行收集程序,无job? 还是要再写一个job?
 6. windows平台有没有更好的计划执行平台,目前用的是windows默认的任务管理器,没有每次执行的日志之类的详细信息,不好用.
 
-#2018-3-8
+
 1. 日线数据检验与修复
+2. futu 数据抽取job program
+3. allotment cninfo加入main sensor
+4. 更新数据库函数增加一个功能,考虑manual adjusted indicator,如果这个标识位X,则在更新数据库时,不会再更新有manual ajusted标识的数据行了,用于已经完成数据校验的table,后续手工修改的部分不会被数据抽取程序自动覆盖. 另一个办法是把校验好的数据放到一个新的表中,还有个办法是加一个时间范围,在某个时间范围之前的就不再自动被更新了.
+5. 从同花顺读取分红数据
+6. 比较cninfo和futuquant的配股信息是否一致
+
+
+
+#2018-3-18
+1.关于硬件架构的思考:
+    - 阿里云的服务器作为OLTP数据抓取程序的运行端与数据库(2核4G内存),基本已经达到极限了.其作为futu的服务器,只复制日线部分的数据
+    - 本地建立服务器作为OLAP,数据使用sql compare和sql data compare保持与服务器同步,其中:
+        - 测试要用到的数据,才进行同步,每周一次或ad hoc,目前就是股票基本信息,和除权信息
+        - 日线数据可以作为job,每周由本地服务器自行抓取
+        - 没用到的数据不进行同步,如财务数据,板块数据
+        - 高频数据也转移到该服务器,每两周或每月执行一次数据抓取
+        - futuquant,分钟线级别数据在该服务器保存.
+
+
+
+#2018-3-10 ~ 2018-3-17
+1. 安装新的本地服务器.
+2. 安装父母的电脑
+
+#2018-3-9
+1. 复权数据初步研究: 
+    1. cninfo和同花顺的复权数据是一致的,futuquant和eastmoney的复权数据是一致,
+    2. cninfo和同花顺复权是考虑股权分置改革的
+    3. futuquant和eastmoney分红复权数据是不考虑股权分置改革的
+    4. 交易所的涨跌幅也是不考虑股权分置改革的,虽然这个感觉很不合理
+    5. netease的dailybar中前收盘数据会考虑复权(用的是复权后金额),change rate也是考虑复权后的,而futuquant的dailybar的PCHG就是简单的数学运算,不考虑复权
+    6. metease的复权数据似乎完全是按照交易所的值的,不考虑股权分置改革导致的分红.
+
+#2018-3-8
+1. futuquant adjust info数据抓取上线
+2. futu的数据(日线,分钟线,复权信息)抓取由于必须要等futu客户端更新完毕才能执行,故建议每周日再确认数据更新已完成后手工执行.
+3. cninfo allotment和dividend上线和job部署.
+4. cninfo dividend program use 股权登记日 as key due to some stocks fh doesn't have 除权基准日 info,maybe wrong record need to fix.to simplily scrap the web and loaded into DB, use 股权登记日 as key can ealisy avoid this problem,before use, user need to double check the 除权基准日 and fix it if required.
+5. cninfo allotment使用除权基准日为key, 
+6. 对于复权,除权基准日才是最重要的信息.
+
 
 #2018-3-7
 1. cninfo 配股信息写入数据库

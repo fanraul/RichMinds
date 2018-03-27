@@ -58,6 +58,7 @@ weblinks = {
     'stock_dailybar_sina':'http://hq.sinajs.cn/list=%s',
     'stock_newslist_jd':'http://gupiao.jd.com/index/newsList.html?pageSize=10&pageNum=%s', #沪深股票资讯
     'jd_stock_news_details_prefix':'http://gupiao.jd.com',
+    'stock_fhsp_10jqka':'http://stockpage.10jqka.com.cn/%s/bonus/#bonuslist',
 }
 
 
