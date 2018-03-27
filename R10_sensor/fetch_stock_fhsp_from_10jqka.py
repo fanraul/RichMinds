@@ -250,7 +250,7 @@ def auto_reprocess():
     ahf.auto_reprocess_dueto_ipblock(identifier=global_module_name, func_to_call= fetch2DB, wait_seconds= 20)
 
 if __name__ == '__main__':
-    fetch2DB('600638')
+    fetch2DB('600368')
 
     # auto_reprocess()
     if len(ls_dfm_dividend) > 0:
