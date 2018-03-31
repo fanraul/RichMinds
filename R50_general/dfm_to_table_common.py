@@ -18,12 +18,18 @@ conn = dcm_sql.getconn()
 hf_dcm_sql = hf_dcm(echo=False)
 hf_conn = hf_dcm_sql.getconn()
 
-def get_cn_stocklist(stock :str ="", ls_excluded_stockids=[]) -> DataFrame:
+def get_cn_stocklist(stock :str ="", ls_excluded_stockids=[],include_inactive=True) -> DataFrame:
     """
     获得沪市和深市的股票清单
     :return: dataframe of SH and SZ stocks
     """
+    if include_inactive == False:
+        str_select_active = ' and is_active = 1'
+    else:
+        str_select_active = ''
+
     if stock == "":
+
         dfm_stocks = pd.read_sql_query('''select Market_ID,Stock_ID,Stock_Name,is_active,
                                             Market_ID + Stock_ID as MktStk_ID,
                                             Tquant_symbol_ID,
@@ -31,7 +37,7 @@ def get_cn_stocklist(stock :str ="", ls_excluded_stockids=[]) -> DataFrame:
                                             from BD_L1_00_cn_stock_code_list 
                                             where ((Market_ID = 'SH' and Stock_ID like '6%') 
                                             or (Market_ID = 'SZ' and (Stock_ID like '0%' or Stock_ID like '3%' )))
-                                            and sec_type = '1' '''
+                                            and sec_type = '1' ''' + str_select_active
                                        # +  'and Stock_ID not in (%s)' %str_excluded_stockids  //don't filter sotck id
                                        # in SQL language, since it might be thousand entry to be exclued, it will cause
                                        # SQL server memory issue since the DB server currently only 2 GB memory!!
@@ -48,7 +54,7 @@ def get_cn_stocklist(stock :str ="", ls_excluded_stockids=[]) -> DataFrame:
                                             from BD_L1_00_cn_stock_code_list
                                                 where  (Market_ID = 'SH' or Market_ID = 'SZ')  
                                                 and sec_type = '1'
-                                                    ''' + "and Stock_ID LIKE '%s'" %stock
+                                                    ''' + "and Stock_ID LIKE '%s'" %stock + str_select_active
                                        , conn)
     return dfm_stocks
 

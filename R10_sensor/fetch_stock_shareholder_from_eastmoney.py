@@ -7,7 +7,7 @@ import R50_general.advanced_helper_funcs as ahf
 import R50_general.dfm_to_table_common as df2db
 import R50_general.general_constants
 import R50_general.general_helper_funcs as gcf
-from R50_general.general_helper_funcs import logprint, parse_chinese_uom, floatN, intN
+from R50_general.general_helper_funcs import logprint, parse_chinese_uom, floatN, intN, pertentage_conversion
 
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
@@ -244,9 +244,9 @@ def json_parse_stock_sh20(json_stock_sh:str):
                 dt_sh10['股东性质'] = item['gdxz']
                 dt_sh10['股份类型'] = item['gflx']
                 dt_sh10['持股数'] = intN(item['cgs'])
-                dt_sh10['占总流通股本持股比例'] = pertentage(item['zltgbcgbl'])
+                dt_sh10['占总流通股本持股比例'] = pertentage_conversion(item['zltgbcgbl'])
                 dt_sh10['增减股数'] = item['zj']
-                dt_sh10['变动比例'] = pertentage(item['bdbl'])
+                dt_sh10['变动比例'] = pertentage_conversion(item['bdbl'])
                 ls_sh10.append(dt_sh10)
                 ls_sh10_index.append(datetime.strptime(item['rq'],'%Y-%m-%d'))
                 """
@@ -281,9 +281,9 @@ def json_parse_stock_sh30(json_stock_sh:str):
                 dt_sh10['股东名称'] = item['gdmc']
                 dt_sh10['股份类型'] = item['gflx']
                 dt_sh10['持股数'] = intN(item['cgs'])
-                dt_sh10['占总流通股本持股比例'] = pertentage(item['zltgbcgbl'])
+                dt_sh10['占总流通股本持股比例'] = pertentage_conversion(item['zltgbcgbl'])
                 dt_sh10['增减股数'] = item['zj']
-                dt_sh10['变动比例'] = pertentage(item['bdbl'])
+                dt_sh10['变动比例'] = pertentage_conversion(item['bdbl'])
                 ls_sh10.append(dt_sh10)
                 ls_sh10_index.append(datetime.strptime(item['rq'],'%Y-%m-%d'))
                 """
@@ -317,9 +317,9 @@ def json_parse_stock_sh40(json_stock_sh:str):
             dt_sh10['股东名称'] = item['gdmc']
             dt_sh10['股份类型'] = item['gflx']
             dt_sh10['持股数'] = intN(item['cgs'])
-            dt_sh10['占总流通股本持股比例'] = pertentage(item['zzgbcgbl'])
+            dt_sh10['占总流通股本持股比例'] = pertentage_conversion(item['zzgbcgbl'])
             dt_sh10['增减股数'] = item['cj']
-            dt_sh10['增减股占原股东持股比例'] = pertentage(item['cjgzygdcgbl'])
+            dt_sh10['增减股占原股东持股比例'] = pertentage_conversion(item['cjgzygdcgbl'])
             dt_sh10['变动原因'] = item['bdyy']
             ls_sh10.append(dt_sh10)
             ls_sh10_index.append(datetime.strptime(item['bdsj'],'%Y-%m-%d'))
@@ -357,9 +357,9 @@ def json_parse_stock_sh50(json_stock_sh:str):
                 dt_sh10['基金名称'] = item['jjmc']
                 dt_sh10['持股数'] = intN(item['cgs'])
                 dt_sh10['持仓市值'] = floatN(item['cgsz'])
-                dt_sh10['占总股本比'] = pertentage(item['zzgbb'])
-                dt_sh10['占流通比'] = pertentage(item['zltb'])
-                dt_sh10['占净值比'] = pertentage(item['zjzb'])
+                dt_sh10['占总股本比'] = pertentage_conversion(item['zzgbb'])
+                dt_sh10['占流通比'] = pertentage_conversion(item['zltb'])
+                dt_sh10['占净值比'] = pertentage_conversion(item['zjzb'])
                 ls_sh10.append(dt_sh10)
                 ls_sh10_index.append(datetime.strptime(item_l1['rq'],'%Y-%m-%d'))
                 """
@@ -394,8 +394,8 @@ def json_parse_stock_sh60(json_stock_sh:str):
             item = {x:y.strip() if y != '--' and y else None for (x,y) in item.items()}
             dt_sh10 = {}
             dt_sh10['解禁股数'] = parse_chinese_uom(item['jjsl'])
-            dt_sh10['解禁股占总股本比例'] = pertentage(item['jjgzzgbbl'])
-            dt_sh10['解禁股占流通股本比例'] = pertentage(item['jjgzltgbbl'])
+            dt_sh10['解禁股占总股本比例'] = pertentage_conversion(item['jjgzzgbbl'])
+            dt_sh10['解禁股占流通股本比例'] = pertentage_conversion(item['jjgzltgbbl'])
             dt_sh10['股票类型'] = item['gplx']
 
             ls_sh10.append(dt_sh10)
@@ -427,13 +427,6 @@ def json_parse_stock_sh60(json_stock_sh:str):
     else:
         return DataFrame()
 
-
-def pertentage(p:str):
-    if not p:
-        return None
-    if p.endswith('%'):
-        return float(p[:-1])/100
-    return float(p)/100
 
 def auto_reprocess():
     ahf.auto_reprocess_dueto_ipblock(identifier=global_module_name, func_to_call=fetch2DB, wait_seconds=60)

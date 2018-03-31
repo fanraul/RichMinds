@@ -784,3 +784,13 @@ if __name__ == "__main__":
     # test module name get function
     # import R10_sensor.fetch_stock_category_from_futuquant
     # print(R10_sensor.fetch_stock_category_from_futuquant.global_module_name)
+
+
+def pertentage_conversion(p:str):
+    if not p:
+        return None
+    if p == '--':
+        return None
+    if p.endswith('%'):
+        return float(p[:-1])/100
+    return float(p)/100

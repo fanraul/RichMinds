@@ -1,0 +1,8 @@
+        dt_fhsp['方案进度'] = head_fhsp[0].text.strip()
+        dt_fhsp['发行类型'] = head_fhsp[1].text.strip()
+        dt_fhsp['发行方式'] = head_fhsp[2].text.strip()
+        dt_fhsp['实际发行价格'] = content_fhsp[0].span.string.strip()  #31.5300元
+        dt_fhsp['新股上市公告日'] = content_fhsp[1].span.string.strip()      #2007-09-04
+        dt_fhsp['实际发行数量'] = content_fhsp[2].span.string.strip()    #3.17亿股
+        dt_fhsp['发行新股日'] = content_fhsp[3].span.string.strip()  #2007-08-24
+        dt_fhsp['实际募资净额'] = content_fhsp[4].span.string.strip()   #99.37亿元        dt_fhsp['证监会核准公告日'] = content_fhsp[5].span.string.strip()  #2007-08-22        dt_fhsp['预案发行价格'] = content_fhsp[6].span.string.strip()    #--        dt_fhsp['发审委公告日'] = content_fhsp[7].span.string.strip()     # 2000-01-10        dt_fhsp['预案发行数量'] = content_fhsp[8].span.string.strip()     # 2000-01-10        dt_fhsp['股东大会公告日'] = content_fhsp[9].span.string.strip()     # 2007-07-13        dt_fhsp['预案募资金额'] = content_fhsp[10].span.string.strip()   #--        dt_fhsp['董事会公告日'] = content_fhsp[11].span.string.strip()     #2000-01-07

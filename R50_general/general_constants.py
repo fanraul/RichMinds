@@ -42,6 +42,8 @@ Global_email_receiver = 'terry.fan@sparkleconsulting.com;fanraul@icloud.com'
 
 tmp_output_path = 'C:\\00_RichMinds\\Github\\RichMinds\\ZZ_output\\'
 
+emchoice_excel_output_path = '\\\\10.10.10.111\\working\\'
+
 weblinks = {
     'stock_list_easymoney': 'http://quote.eastmoney.com/stocklist.html',   # obselete
     'stock_change_record_qq': 'http://stock.finance.qq.com/corp1/profile.php?zqdm=%(stock_id)s',
@@ -97,6 +99,11 @@ dbtables = {
     'stock_1minbar_Tquant': 'HF_%s_1minbar_Tquant',
     'stock_adjinfo_futuquant':'DD_stock_adjinfo_futuquant',
     'stock_allotment_cninfo':'DD_stock_allotment_cninfo',
+    'stock_fhsp_html_snapshot_10jqka':'YY_stock_fhsp_snapshot_10jqka',
+    'stock_dividend_10jqka':'DD_stock_dividend_10jqka',
+    'stock_allotment_10jqka': 'DD_stock_allotment_10jqka',
+    'stock_diriss_10jqka': 'DD_stock_diriss_10jqka',
+    'stock_dailybar_emchoice':'DD_stock_dailybar_emchoice',
 }
 dbtemplate_stock_date = """
 CREATE TABLE [%(table)s](
