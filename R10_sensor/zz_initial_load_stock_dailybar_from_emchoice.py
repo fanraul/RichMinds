@@ -116,31 +116,43 @@ def produce_bulkinsert_files():
                     }
     df2db.add_new_chars_and_cols(dict_cols_cur, list(dfm_db_chars['Char_ID']), table_name, dict_misc_pars)
 
-    ls_dfms =[]
+    # ls_dfms =[]
 
-    bis_handler = open(bulkinsert_script_file,'w',encoding='utf-8')
+    # bis_handler = open(bulkinsert_script_file,'w',encoding='utf-8')
+    # bis_handler = open(bulkinsert_script_file,'w')
 
     for i in range(total_id):
         file_name = 'fetch_dailybars_%s_to_%s_%s.xlsx' %(start_date,end_date,str(i+1))
         filename_with_path = excel_path + file_name
         logprint('Processing file: %s ...' %filename_with_path)
         # load excel results into dfm
-
-        # filename_with_path = r'C:\Users\Terry Fan\Desktop\fetch_dailybars_2005-01-01_to_2018-03-29_1.xlsx'
-        dfm_stock_dailybars = pd.read_excel(filename_with_path,sheetname='hist',header=1,skip_footer=2)
+        try:
+            # filename_with_path = r'C:\Users\Terry Fan\Desktop\fetch_dailybars_2005-01-01_to_2018-03-29_1.xlsx'
+            dfm_stock_dailybars = pd.read_excel(filename_with_path,sheetname='hist',header=1,skip_footer=2)
+        except:
+            logprint('Processing file: %s failed!')
+            continue
 
         dfm_fmt_dailybar = format_dfm(dfm_stock_dailybars)
 
         for index,row in dfm_fmt_dailybar.iterrows():
             if row['交易状态'] == '' or row ['交易状态'] == None:
                 logprint('Error: file %s is incorrect, there are lines without 交易状态!' %file_name)
-            bis_handler.write(';'.join([str(x) if str(x) != 'nan' else '' for x in row]))
-            bis_handler.write('\n')
+                continue
+            # bis_handler.write(';'.join([str(x) if str(x) != 'nan' else '' for x in row]))
+            # bis_handler.write('\n')
 
-        ls_dfms.append(dfm_fmt_dailybar)
+        key_cols = ['Market_ID', 'Stock_ID', 'Trans_Datetime']
 
-    bis_handler.close()
-    dfm_fmt_dailybar.to_csv(get_tmp_file('tmp2.csv'))
+        gcf.dfm_col_type_conversion(dfm_fmt_dailybar, columns=dict_cols_cur, dateformat='%Y-%m-%d')
+
+        df2db.dfm_to_db_insert_or_update(dfm_fmt_dailybar, key_cols, table_name, global_module_name,
+                                         process_mode='wo_update')
+
+        # ls_dfms.append(dfm_fmt_dailybar)
+
+    # bis_handler.close()
+    # dfm_fmt_dailybar.to_csv(get_tmp_file('tmp2.csv'))
 
 def format_dfm(dfm_dailybar:DataFrame):
 
