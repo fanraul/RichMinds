@@ -8,15 +8,18 @@ Global_1minbar_begin_datetime = datetime(2017,2,1)
 hostname = socket.gethostname()
 ls_hostname_PRD = ['iZgaizjy01f4atZ',]
 ls_hostname_DEV = ['BELLA-MACBUKAIR',]
-ls_hostname_HF_PRD = ['TERRY-X200']
+# ls_hostname_HF_PRD = ['TERRY-X200']
+ls_hostname_OLAP = ['RMDSVR0']    # RICHMIND: mirror of PRD for data analyis OLAP; RICHMIND_HF PRD
 
 
 if hostname in ls_hostname_DEV:
     host_type = 'DEV'
 elif hostname in ls_hostname_PRD:
     host_type = 'PRD'
-elif hostname in ls_hostname_HF_PRD:
-    host_type = 'HF_PRD'
+# elif hostname in ls_hostname_HF_PRD:
+#     host_type = 'HF_PRD'
+elif hostname in ls_hostname_OLAP:
+    host_type = 'HF_OLAP'
 else:
     assert 0==1,'please update the hostname into DEV list or PRD list'
 
@@ -29,6 +32,9 @@ elif host_type == 'PRD':
 elif host_type == 'HF_PRD':
     futu_api_ip = '101.132.98.4'
     Global_path_news_details_jd = 'C:\\80_Business_docs\\news\\jd\\'
+elif host_type == 'HF_OLAP':
+    futu_api_ip = '101.132.98.4'
+    Global_path_news_details_jd = 'D:\\80_Business_docs\\news\\jd\\'
 else:
     assert 0==1,'unknown host type'
 
