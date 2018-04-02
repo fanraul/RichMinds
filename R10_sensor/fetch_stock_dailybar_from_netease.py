@@ -51,7 +51,7 @@ def fetch2DB(stockid:str):
                      'turnover':'decimal(10,4)',
                      'vol':'decimal(15,2)',
                      'amount': 'decimal(15,2)',
-                     '前收盘':'decimal(12,4)',
+                     'preclose':'decimal(12,4)',
                      'CHG':'decimal(12,4)',
                      'PCHG':'decimal(10,4)',
                      'TCAP':'decimal(18,2)',
@@ -136,7 +136,7 @@ def get_dialybar_by_mktstkid(market_id,stock_id:str,begin_time,end_time):
                 dt_dailybar['high']= ls_figs[4]
                 dt_dailybar['low']= ls_figs[5]
                 dt_dailybar['open']= ls_figs[6]
-                dt_dailybar['前收盘']= ls_figs[7]
+                dt_dailybar['preclose']= ls_figs[7]
                 dt_dailybar['CHG']= ls_figs[8]
                 dt_dailybar['PCHG']= ls_figs[9]
                 dt_dailybar['turnover']= ls_figs[10]

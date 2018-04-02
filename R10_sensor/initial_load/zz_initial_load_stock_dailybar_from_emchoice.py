@@ -46,17 +46,17 @@ ls_pars = [
 
 dict_pars = {
     '时间': 'Trans_Datetime',
-    '前收盘价':'PRECLOSE',  # 前收盘价
-    '开盘价':'OPEN',  # 开盘价
-    '最高价':'HIGH',  # 最高价
-    '最低价':'LOW',  # 最低价
-    '收盘价':'CLOSE',  # 收盘价
-    '涨跌':'CHANGE',  # 涨跌
-    '涨跌幅':'PCTCHANGE',  # 涨跌幅
-    '成交量':'VOLUME',  # 成交量
-    '成交额':'AMOUNT',  # 成交额
+    '前收盘价':'preclose',  # 前收盘价
+    '开盘价':'open',  # 开盘价
+    '最高价':'high',  # 最高价
+    '最低价':'low',  # 最低价
+    '收盘价':'close',  # 收盘价
+    '涨跌':'CHG',  # 涨跌
+    '涨跌幅':'PCHG',  # 涨跌幅
+    '成交量':'vol',  # 成交量
+    '成交额':'amount',  # 成交额
     '均价':'AVERAGE',  # 均价
-    '换手率':'TURN',  # 换手率
+    '换手率':'turnover',  # 换手率
     '振幅':'AMPLITUDE',  # 振幅
     '交易状态':'TRADESTATUS',  # 交易状态
     '成交笔数':'TNUM',  # 成交笔数
@@ -92,17 +92,17 @@ def produce_bulkinsert_files():
     table_name = R50_general.general_constants.dbtables['stock_dailybar_emchoice']
     df2db.create_table_by_template(table_name,table_type='stock_date')
     dict_cols_cur = {
-                    'PRECLOSE':'decimal(12,4)',  # 前收盘价
-                    'OPEN':'decimal(12,4)',  # 开盘价
-                    'HIGH':'decimal(12,4)',  # 最高价
-                    'LOW':'decimal(12,4)',  # 最低价
-                    'CLOSE':'decimal(12,4)',  # 收盘价
-                    'CHANGE':'decimal(12,4)',  # 涨跌
-                    'PCTCHANGE':'decimal(12,4)',  # 涨跌幅
-                    'VOLUME':'decimal(15,2)',  # 成交量
-                    'AMOUNT':'decimal(15,2)',  # 成交额
+                    'preclose':'decimal(12,4)',  # 前收盘价
+                    'open':'decimal(12,4)',  # 开盘价
+                    'high':'decimal(12,4)',  # 最高价
+                    'low':'decimal(12,4)',  # 最低价
+                    'close':'decimal(12,4)',  # 收盘价
+                    'CHG':'decimal(12,4)',  # 涨跌
+                    'PCHG':'decimal(12,4)',  # 涨跌幅
+                    'vol':'decimal(15,2)',  # 成交量
+                    'amount':'decimal(15,2)',  # 成交额
                     'AVERAGE':'decimal(12,4)',  # 均价
-                    'TURN':'decimal(12,4)',  # 换手率
+                    'turnover':'decimal(12,4)',  # 换手率
                     'AMPLITUDE':'decimal(12,4)',  # 振幅
                     'TRADESTATUS':'nvarchar(50)',  # 交易状态
                     'TNUM':'decimal(15,2)',  # 成交笔数
@@ -136,7 +136,7 @@ def produce_bulkinsert_files():
         dfm_fmt_dailybar = format_dfm(dfm_stock_dailybars)
 
         for index,row in dfm_fmt_dailybar.iterrows():
-            if row['交易状态'] == '' or row ['交易状态'] == None:
+            if row['TRADESTATUS'] == '' or row ['TRADESTATUS'] == None:  # check 交易状态
                 logprint('Error: file %s is incorrect, there are lines without 交易状态!' %file_name)
                 continue
             # bis_handler.write(';'.join([str(x) if str(x) != 'nan' else '' for x in row]))
@@ -145,6 +145,8 @@ def produce_bulkinsert_files():
         key_cols = ['Market_ID', 'Stock_ID', 'Trans_Datetime']
 
         gcf.dfm_col_type_conversion(dfm_fmt_dailybar, columns=dict_cols_cur, dateformat='%Y-%m-%d')
+
+        dfm_fmt_dailybar.to_csv(get_tmp_file('tmp2.csv'))
 
         df2db.dfm_to_db_insert_or_update(dfm_fmt_dailybar, key_cols, table_name, global_module_name,
                                          process_mode='wo_update')
@@ -165,39 +167,19 @@ def format_dfm(dfm_dailybar:DataFrame):
     dfm_dailybar['是否ST']= dfm_dailybar['是否ST'].map({'是': 'Y','否':'N'})
     dfm_dailybar['是否*ST']= dfm_dailybar['是否*ST'].map({'是': 'Y','否':'N'})
     dfm_dailybar = dfm_dailybar[dfm_dailybar['交易状态'] != '未上市']
-    dfm_dailybar['created_by'] = global_module_name
-    dfm_dailybar['created_datetime'] = datetime.now()
-    dfm_dailybar['updated_by'] = ''
-    dfm_dailybar['updated_datetime'] = ''
+    # dfm_dailybar['created_by'] = global_module_name
+    # dfm_dailybar['created_datetime'] = datetime.now()
+    dfm_dailybar.rename(columns = dict_pars,inplace=True)
+    # dfm_dailybar['updated_by'] = ''
+    # dfm_dailybar['updated_datetime'] = ''
     return dfm_dailybar[['Market_ID',
                          'Stock_ID',
-                         '时间',
-                         'created_datetime',
-                         'created_by',
-                         'updated_datetime',
-                         'updated_by',
-                        '前收盘价',  # 前收盘价
-                        '开盘价',  #:'OPEN',  # 开盘价
-                        '最高价',  #:'HIGH',  # 最高价
-                        '最低价',  #:'LOW',  # 最低价
-                        '收盘价',  #:'CLOSE',  # 收盘价
-                        '涨跌',  #'CHANGE',  # 涨跌
-                        '涨跌幅',  #'PCTCHANGE',  # 涨跌幅
-                        '成交量',  #'VOLUME',  # 成交量
-                        '成交额',  #'AMOUNT',  # 成交额
-                        '均价',  #'AVERAGE',  # 均价
-                        '换手率',  #'TURN',  # 换手率
-                        '振幅',  #'AMPLITUDE',  # 振幅
-                        '交易状态',  #'TRADESTATUS',  # 交易状态
-                        '成交笔数',  #'TNUM',  # 成交笔数
-                        '复权因子(后)',  #'TAFACTOR',  # 复权因子(后)
-                        '内盘成交量',  #'BUYVOL',  # 内盘成交量
-                        '外盘成交量',  #'SELLVOL',  # 外盘成交量
-                        '是否涨停',  #'HIGHLIMIT',  # 是否涨停
-                        '是否跌停',  #'LOWLIMIT',  # 是否跌停
-                        '是否ST',  #'ISSTSTOCK',  # 是否ST
-                        '是否*ST',  #'ISXSTSTOCK',  # 是否*ST
-           ]]
+                        # 'created_datetime',
+                        # 'created_by'
+                         ] + list(dict_pars.values())
+                         # 'updated_datetime',
+                         # 'updated_by',
+                         ]
 
 def get_start_date():
     return '2005-01-01'

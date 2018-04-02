@@ -202,6 +202,8 @@ def dfm_col_type_conversion(dfm:DataFrame,index='',columns= {}, dateformat='%Y-%
     def str_conversion(s):
         if s == 0:
             return '0'
+        if pd.isnull(s) or s == '--':
+            return None
         if s:
             return str(s)
         else:

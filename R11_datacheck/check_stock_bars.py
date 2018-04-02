@@ -9,19 +9,29 @@ from R50_general.general_helper_funcs import logprint,get_tmp_file
 import R50_general.general_helper_funcs as gcf
 import R50_general.dfm_to_table_common as df2db
 # import R50_general.advanced_helper_funcs as ahf
-from R50_general.DBconnectionmanager import _get_prd_conn
 
 from futuquant.open_context import *
 from R50_general.general_constants import futu_api_ip as api_ip
 from R50_general.general_constants import futu_api_port as api_port
 
+dict_cols_rename_emchoice = {
+                            'PRECLOSE': '前收盘',  # 前收盘价
+                            'OPEN': 'open',  # 开盘价
+                            'HIGH': 'high',  # 最高价
+                            'LOW': 'low',  # 最低价
+                            'CLOSE': 'close',  # 收盘价
+                            'CHANGE': 'CHG',  # 涨跌
+                            'PCTCHANGE': 'PCHG',  # 涨跌幅
+                            'VOLUME': 'vol',  # 成交量
+                            'AMOUNT': 'amount',  # 成交额
+                            'TURN': 'turnover',  # 换手率
+                             }
 
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 check_period_starttime = datetime(2005,1,1,0)
-check_period_endtime   = datetime(2018,3,2,23)
+check_period_endtime   = datetime(2018,3,31,23)
 
-conn_prd = _get_prd_conn()
 
 def check_bars(ls_tradingdates,table1,table2,dfm_stocks,dt_cols):
     sorted(ls_tradingdates)
@@ -54,11 +64,17 @@ def check_bar(mtk_id,stk_id,ls_tradingdates,table1,table2,dt_cols):
                {'db_col': 'Trans_Datetime', 'db_oper': '<=', 'db_val': "'%s'" % end_time},
                ]
     dfm_cond = DataFrame(ls_cond)
-    dfm_table1 = df2db.get_data_from_DB(table1,dfm_cond,alter_conn = conn_prd)
+    dfm_table1 = df2db.get_data_from_DB(table1,dfm_cond)
+    if table1 == 'DD_stock_dailybar_emchoice':
+        dfm_table1.rename(columns=dict_cols_rename_emchoice,inplace=True)
     dfm_table1 = dfm_table1[['Market_ID','Stock_ID','Trans_Datetime'] + list(dt_cols.keys())]
 
-    dfm_table2 = df2db.get_data_from_DB(table2,dfm_cond,alter_conn = conn_prd)
+    dfm_table2 = df2db.get_data_from_DB(table2,dfm_cond)
+
+    if table2 == 'DD_stock_dailybar_emchoice':
+        dfm_table2.rename(columns=dict_cols_rename_emchoice,inplace=True)
     dfm_table2 = dfm_table2[['Market_ID','Stock_ID','Trans_Datetime'] + list(dt_cols.keys())]
+
 
     if len(dfm_table1) == 0 and len(dfm_table2) == 0:
         return DataFrame()
@@ -127,7 +143,6 @@ def check_cn_dailybars(stockid):
     # ls_trading_dates = gcf.get_trading_days_futuquant('SH',
     #                                                   check_period_starttime.strftime('%Y-%m-%d'),
     #                                                   check_period_endtime.strftime('%Y-%m-%d'))
-    now = datetime.now().strftime('%m%d-%H_%M_%S')
 
     ls_trading_dates = [check_period_starttime.strftime('%Y-%m-%d'),check_period_endtime.strftime('%Y-%m-%d')]
     dfm_stocks = df2db.get_cn_stocklist(stockid)
@@ -136,30 +151,29 @@ def check_cn_dailybars(stockid):
     tquant_bars = 'DD_stock_dailybar_Tquant'
     netease_bars = 'DD_stock_dailybar_netease'
     futu_bars = 'DD_stock_dailybar_futuquant'
+    emchoice_bars = 'DD_stock_dailybar_emchoice'
 
     # Tquant vs netease
-    dt_cols_tquant_netease = {'open': (1,2),    #(1,2) means float compare equal in 2 decimal
+    dt_cols_tquant_netease = {
+                              'open': (1,2),    #(1,2) means float compare equal in 2 decimal
                               'close':(1,2),
                               'low':(1,2),
                               'high':(1,2),
                               'vol':(2,3),      #(2,3) means float compare equal at thounsands, 1000 is the same as 1499.
-                              'amount':(2,4)
+                              'amount':(2,4),
                              }
-    # dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,netease_bars,dfm_stocks,dt_cols_tquant_netease)
-    #
-    # if len(dfm_checkresults) > 0:
-    #     dfm_checkresults.to_excel(get_tmp_file('%s_%s_Tquant_vs_netease_dailybars_check_result.xlsx' %(now,stockid)))
-    # else:
-    #     logprint('There is no difference for (%s)_Tquant_vs_netease_dailybars'%stockid)
+    dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,netease_bars,dfm_stocks,dt_cols_tquant_netease)
 
-    # Tquant vs futuquant
-    dt_cols_tquant_futuquant = {'open': (1,2),    #(1,2) means float compare equal in 2 decimal
-                              'close':(1,2),
-                              'low':(1,2),
-                              'high':(1,2),
-                              'vol':(2,3),      #(2,3) means float compare equal at thounsands, 1000 is the same as 1499.
-                              'amount':(2,4)
-                               }
+    dfm_compare_results_to_file(dfm_checkresults,'tquant','netease',stockid)
+
+    # # Tquant vs futuquant
+    # dt_cols_tquant_futuquant = {'open': (1,2),    #(1,2) means float compare equal in 2 decimal
+    #                           'close':(1,2),
+    #                           'low':(1,2),
+    #                           'high':(1,2),
+    #                           'vol':(2,3),      #(2,3) means float compare equal at thounsands, 1000 is the same as 1499.
+    #                           'amount':(2,4)
+    #                            }
     # dfm_checkresults = check_bars(ls_trading_dates,tquant_bars,futu_bars,dfm_stocks,dt_cols_tquant_futuquant)
     #
     # if len(dfm_checkresults) > 0:
@@ -178,14 +192,40 @@ def check_cn_dailybars(stockid):
                                }
     dfm_checkresults = check_bars(ls_trading_dates,netease_bars,futu_bars,dfm_stocks,dt_cols_netease_futuquant)
 
+    dfm_compare_results_to_file(dfm_checkresults,'netease','futuquant',stockid)
+
+
+    # netease vs emchoice
+    dt_cols_netease_emchoice = {'open': (1,2),    #(1,2) means float compare equal in 2 decimal
+                              'close':(1,2),
+                              'low':(1,2),
+                              'high':(1,2),
+                              'vol':(2,3),      #(2,3) means float compare equal at thounsands, 1000 is the same as 1499.
+                              'amount':(2,4),
+                              'PCHG':(3,0.01),   #(3,0.01) means float compare, the absolute difference bewteen two value should less than or equal to 0.01
+                              '前收盘': (1, 2),
+                              'CHG': (1, 2),  # 涨跌
+                              'turnover': (3,0.0001),  # 换手率
+
+                               }
+    dfm_checkresults = check_bars(ls_trading_dates,netease_bars,emchoice_bars,dfm_stocks,dt_cols_netease_emchoice)
+
+    dfm_compare_results_to_file(dfm_checkresults,'netease','emchoice',stockid)
+
+
+def dfm_compare_results_to_file(dfm_checkresults,sc1,sc2,stockid):
+
+    now = datetime.now().strftime('%m%d-%H_%M_%S')
+
     if len(dfm_checkresults) > 0:
-        dfm_checkresults.to_excel(get_tmp_file('%s_%s_netease_vs_futuquant_dailybars_check_result.xlsx' %(now,stockid)))
+        dfm_checkresults.to_excel(get_tmp_file('%s_%s_%s_vs_%s_dailybars_check_result.xlsx' %(now,stockid,sc1,sc2)))
     else:
-        logprint('There is no difference for (%s)_netease_vs_futuquant_dailybars'%stockid)
+        logprint('There is no difference for (%s)_%s_vs_%s_dailybars'%(stockid,sc1,sc2))
+
 
 
 if __name__ == '__main__':
-    # check_cn_dailybars('600000')
+    check_cn_dailybars('600000')
     # check_cn_dailybars('001%')
     # check_cn_dailybars('600%')
     # check_cn_dailybars('601%')
@@ -195,5 +235,5 @@ if __name__ == '__main__':
     # check_cn_dailybars('002%')
     # check_cn_dailybars('2%')
     # check_cn_dailybars('3%')
-    check_cn_dailybars('000%')
+    # check_cn_dailybars('000%')
 
