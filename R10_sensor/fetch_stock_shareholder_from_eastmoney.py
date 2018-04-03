@@ -200,6 +200,8 @@ def json_parse_stock_sh10(json_stock_sh:str):
 
     if dt_json_stksh:
         ls_gdrs = dt_json_stksh['gdrs']
+        if ls_gdrs == None:
+            return DataFrame()
         for item in ls_gdrs:
             item = {x:y.strip() if y != '--' and y else None for (x,y) in item.items()}
             dt_sh10 = {}
