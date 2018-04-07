@@ -14,6 +14,13 @@ from R50_general.general_helper_funcs import logprint, get_tmp_file
 import R50_general.dfm_to_table_common as df2db
 import xlrd
 
+'''
+two ways to use this program:
+1. produce_bulkinsert_files() , used to load the excels produced by program zz_produce_stock_dailybar_excel_from_emchoice, mainly for initial loading
+2. load_single_emchoice_excel_to_db(),used to load a specific file, used to reload some error data.
+'''
+
+
 global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 
 excel_path = R50_general.general_constants.emchoice_excel_output_path
@@ -187,9 +194,83 @@ def get_start_date():
 def get_end_date():
     return '2018-03-29'
 
-if __name__ == '__main__':
-    produce_bulkinsert_files()
+def load_single_emchoice_excel_to_db():
 
+    # init step
+    dict_misc_pars = {}
+    dict_misc_pars['char_origin'] = 'EMCHOICE'
+    dict_misc_pars['char_freq'] = "D"
+    dict_misc_pars['allow_multiple'] = 'N'
+    dict_misc_pars['created_by'] = dict_misc_pars['update_by'] = global_module_name
+    dict_misc_pars['char_usage'] = 'DAILYBAR'
+    # check whether db table is created.
+    table_name = R50_general.general_constants.dbtables['stock_dailybar_emchoice']
+    dict_cols_cur = {
+                    'preclose':'decimal(12,4)',  # 前收盘价
+                    'open':'decimal(12,4)',  # 开盘价
+                    'high':'decimal(12,4)',  # 最高价
+                    'low':'decimal(12,4)',  # 最低价
+                    'close':'decimal(12,4)',  # 收盘价
+                    'CHG':'decimal(12,4)',  # 涨跌
+                    'PCHG':'decimal(12,4)',  # 涨跌幅
+                    'vol':'decimal(15,2)',  # 成交量
+                    'amount':'decimal(15,2)',  # 成交额
+                    'AVERAGE':'decimal(12,4)',  # 均价
+                    'turnover':'decimal(12,4)',  # 换手率
+                    'AMPLITUDE':'decimal(12,4)',  # 振幅
+                    'TRADESTATUS':'nvarchar(50)',  # 交易状态
+                    'TNUM':'decimal(15,2)',  # 成交笔数
+                    'TAFACTOR':'decimal(10,6)',  # 复权因子(后)
+                    'BUYVOL':'decimal(15,2)',  # 内盘成交量
+                    'SELLVOL':'decimal(15,2)',  # 外盘成交量
+                    'HIGHLIMIT':'nvarchar(1)',  # 是否涨停
+                    'LOWLIMIT':'nvarchar(1)',  # 是否跌停
+                    'ISSTSTOCK':'nvarchar(1)',  # 是否ST
+                    'ISXSTSTOCK':'nvarchar(1)',  # 是否*ST
+                    }
+
+    # specify the file name to load!!
+    file_name = 'fetch_dailybars_missing_double_check - 3%.xlsx'
+
+    filename_with_path = excel_path + file_name
+    logprint('Processing file: %s ...' %filename_with_path)
+    # load excel results into dfm
+    try:
+        # filename_with_path = r'C:\Users\Terry Fan\Desktop\fetch_dailybars_2005-01-01_to_2018-03-29_1.xlsx'
+        dfm_stock_dailybars = pd.read_excel(filename_with_path,sheetname='hist',header=1,skip_footer=2)
+    except:
+        logprint('Processing file: %s failed!')
+
+    dfm_fmt_dailybar = format_dfm(dfm_stock_dailybars)
+
+    for index,row in dfm_fmt_dailybar.iterrows():
+
+        # TODO: 测试279文件在数据不全的情况下是否会报错！
+        if row['TRADESTATUS'] == '' or pd.isnull(row['TRADESTATUS']) :  # check 交易状态
+            logprint('Error: file %s is incorrect, there are lines without 交易状态!' %file_name)
+            continue
+        # bis_handler.write(';'.join([str(x) if str(x) != 'nan' else '' for x in row]))
+        # bis_handler.write('\n')
+
+    key_cols = ['Market_ID', 'Stock_ID', 'Trans_Datetime']
+
+    gcf.dfm_col_type_conversion(dfm_fmt_dailybar, columns=dict_cols_cur, dateformat='%Y-%m-%d')
+
+    # dfm_fmt_dailybar.to_csv(get_tmp_file('tmp2.csv'))
+
+    df2db.dfm_to_db_insert_or_update(dfm_fmt_dailybar, key_cols, table_name, global_module_name,
+                                     process_mode='w_update')
+
+        # ls_dfms.append(dfm_fmt_dailybar)
+
+    # bis_handler.close()
+    # dfm_fmt_dailybar.to_csv(get_tmp_file('tmp2.csv'))
+
+
+
+if __name__ == '__main__':
+    # produce_bulkinsert_files()
+    load_single_emchoice_excel_to_db()
 
 '''
 bulk insert file format:
