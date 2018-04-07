@@ -13,7 +13,70 @@ TODO:
 4. 更新数据库函数增加一个功能,考虑manual adjusted indicator,如果这个标识位X,则在更新数据库时,不会再更新有manual ajusted标识的数据行了,用于已经完成数据校验的table,后续手工修改的部分不会被数据抽取程序自动覆盖. 另一个办法是把校验好的数据放到一个新的表中,还有个办法是加一个时间范围,在某个时间范围之前的就不再自动被更新了.
 5. 从同花顺读取分红数据
 6. 比较cninfo和futuquant的配股信息是否一致
+7. 从em choice中获得股本数据,并导入,并与现有的数据进行比较.现有数据是netease和sina,感觉都不是很靠谱
+8. 后续对em choice的期初数据导入完成后,要新建一个sensor程序,专门针对em choice的数据导入,这个程序手工运行,可几个月运行一次,或每周运行一次.
+9. 增加dailybar数据源cninfo,有股本信息和股票名称历史信息(这个很有用)
 
+#2018-4-6
+1. 振幅的计算逻辑:
+    - emchoice, (high-low)/preclose
+    - cninfo,(high-low)/low
+   结论,明显emchoice的才是正确的
+2. cninfo也存在丢数据的情况, 601607在2007的数据是缺失的,netease也有这个问题,难道他们是相同的数据源?
+3. cninfo中的日线数据中的证券简称字段是保留股票当时的名称的,可以用于查看股票的历史名称.
+4. dailybar比较总结
+    - futuquant的数据质量最差,不再使用
+    - netease的数据质量最好,其次是emchoice,最后是Tquant
+    - cninfo的质量也还行
+    - netease,cninfo和emchoice和tquant都存在缺数据的现象
+    - 相比之下,有数据的情况下,netease的数据质量最高,错误率最小,如果netease和tquant是一致的,但是和cmchoice不一致,一般都是emchoice的错误
+    - 当netease和emchoice一致,和tquant不一致时,一般是tquant的错误
+    - cninfo有时是正确的,有时和emchoice一致,但是和netease/Tquant不一致,我在查看了choice金融终端的历史K线图后,感觉还是netease是正确的
+5. dailybar检查的方法与遗留问题
+    - 用程序比较后,错误一般分为三类,left only,right only,和both
+    - left only和right only中药排除stockid doesn't exist的错误,由于有的数据源是不包含部分退市股票的历史数据的,所以这类错误没有处理的意义
+    - 剩下的left only和right only一般就是缺数据,参照其他数据源补全即可
+    - both的问题比较复杂,说明有具体有些字段有问题, 其中:
+        - open,直接修改就行
+        - low,high,还要记得修改amplitude字段
+        - preclose,close,还要修改chg,pchg字段
+        - amount,vol,直接修改,暂不修改turnover字段
+        - turnover字段,本次检查不考虑这个字段
+        - TRADESTATUS,注意复牌这个状态,最好再导入之前,检查现有这个状态,参照后在修改之
+    - 最难处理的问题是preclose, 有些股改复牌日的preclose字段交易所设置的并不合理(没有考虑股改复权),但是目前也暂不考虑复权之类的,直接按照交易所的公开数据维护preclose,
+6. 具体处理log参见dailybar_compare_log all 2005-1-1~20180331.xlsx
+7. 
+
+
+#2018-4-3
+
+1. dailybar数据清理,不同数据源处理数据的特殊逻辑.
+    - 360改代码事件: 601313改代码成601360, 
+        - netease的dailybar还是保留在原来601313上, 同时dialybar也放到601360下面,有一段时间的overlap;
+        - tquant的dailybar还是保留原来601313的dailybars, 知道在2-28日改名发生后,dialybar转到了601360下面,无overlap;
+        - 而choice则把601313的历史记录全部转到了601360上面了,而601313就没有dailybar记录了!,
+      (感觉还是Tquant的做法最正确.但是choice目前的处理方式对后续处理的影响最小.)
+    - netease的dailybar中前收盘数据会考虑复权(用的是复权后金额),change rate也是考虑复权后的,而futuquant的dailybar的PCHG就是简单的数学运算,不考虑复权
+    - em choice的dailybar中前收盘数据会考虑复权(用的是复权后金额),change rate也是考虑复权后的
+    - netease的复权数据似乎完全是按照交易所的值的,不考虑股权分置改革导致的分红.
+2. emchoice/netease数据逻辑:
+    - CHG = close -preclose (preclose是复权后的前交易日close)
+    - PCHG = CHG/preclose
+
+
+#2018-4-2
+1. 从eastmoney的choice金融终端获得日线数据,并导入数据库. 
+2. 经测试,无法使用sql server的bulk insert方法, 似乎和python生成的数据文件有格式上的不兼容(python write 生成的文件),还是使用df2db中的现有函数导入数据库
+3. dailybar 比较,经过实际比较分析后,确认只比较,OCHL,vol,amount. turnover由于netease和em choice的差异过大,暂时不进行检查.
+4. 现阶段完善数据的范围是从2005-1-1 到2018-3-31, 数据对象是:
+    1. 日线数据,
+    2. 分红配送数据
+    3. 股本数据.
+
+5. 初步比较的结果:
+    - tquant vs emchoice: tquant要补2018-3-12,2018-3-13,2018-3-14三天的数据
+    - netease vs emchoice: netease 要补2017-11-20,2018-1-2两天的数据
+    - futuquant vs emchoice:
 
 
 #2018-3-18
@@ -26,8 +89,6 @@ TODO:
         - 高频数据也转移到该服务器,每两周或每月执行一次数据抓取
         - futuquant,分钟线级别数据在该服务器保存.
 
-
-
 #2018-3-10 ~ 2018-3-17
 1. 安装新的本地服务器.
 2. 安装父母的电脑
@@ -38,8 +99,7 @@ TODO:
     2. cninfo和同花顺复权是考虑股权分置改革的
     3. futuquant和eastmoney分红复权数据是不考虑股权分置改革的
     4. 交易所的涨跌幅也是不考虑股权分置改革的,虽然这个感觉很不合理
-    5. netease的dailybar中前收盘数据会考虑复权(用的是复权后金额),change rate也是考虑复权后的,而futuquant的dailybar的PCHG就是简单的数学运算,不考虑复权
-    6. metease的复权数据似乎完全是按照交易所的值的,不考虑股权分置改革导致的分红.
+
 
 #2018-3-8
 1. futuquant adjust info数据抓取上线
