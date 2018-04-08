@@ -23,7 +23,7 @@ global_module_name = gcf.get_cur_file_name_by_module_name(__name__)
 # last_trading_date = last_trading_datetime.date()
 
 end_fetch_datetime = gcf.get_last_trading_daytime()
-end_fetch_datetime = datetime(2018,3,2,23)
+end_fetch_datetime = datetime(2018,3,31,23)
 
 last_fetch_datetime = df2db.get_last_fetch_date(global_module_name)
 
@@ -57,7 +57,7 @@ def fetch2DB(stockid:str):
     # step2.1: get current stock list
     dfm_stocks = df2db.get_cn_stocklist(stockid)
 
-    if last_fetch_datetime and last_fetch_datetime >= end_fetch_datetime.date():
+    if last_fetch_datetime and last_fetch_datetime.date() >= end_fetch_datetime.date():
         logprint('No need to fetch dialybar since last_fetch_date %s is later than or equal to end fetch date %s' %(last_fetch_datetime.date(),
                                                                                                                     end_fetch_datetime.date()))
         return

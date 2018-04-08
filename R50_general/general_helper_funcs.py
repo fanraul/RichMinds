@@ -202,6 +202,8 @@ def dfm_col_type_conversion(dfm:DataFrame,index='',columns= {}, dateformat='%Y-%
     def str_conversion(s):
         if s == 0:
             return '0'
+        if pd.isnull(s) or s == '--':
+            return None
         if s:
             return str(s)
         else:
@@ -584,7 +586,7 @@ def get_cur_file_name_by_module_name(name):
     """
     if name == '__main__':
         # it is main script, get file name from sys.argv[0]
-        # samle:'C:\\Program Files\\JetBrains\\PyCharm Community Edition 2017.3.2\\helpers\\pydev\\pydevconsole.py'
+        # sample:'C:\\Program Files\\JetBrains\\PyCharm Community Edition 2017.3.2\\helpers\\pydev\\pydevconsole.py'
         str_filename = sys.argv[0].split('/')[-1]
         return str_filename.split('.')[0]
     else:

@@ -51,7 +51,7 @@ def fetch2DB(stockid:str):
                      'turnover':'decimal(10,4)',
                      'vol':'decimal(15,2)',
                      'amount': 'decimal(15,2)',
-                     '前收盘':'decimal(12,4)',
+                     'preclose':'decimal(12,4)',
                      'CHG':'decimal(12,4)',
                      'PCHG':'decimal(10,4)',
                      'TCAP':'decimal(18,2)',
@@ -88,7 +88,7 @@ def fetch2DB(stockid:str):
             # step2: format raw data into prop data type
             # gcf.dfmprint(dfm_stk_info)
             gcf.dfm_col_type_conversion(dfm_stk_info, columns=dict_cols_cur)
-            gcf.dfmprint(dfm_stk_info)
+            # gcf.dfmprint(dfm_stk_info)
             df2db.load_dfm_to_db_single_value_by_mkt_stk_w_hist(row['Market_ID'], row['Stock_ID'], dfm_stk_info, table_name,
                                                                 dict_misc_pars,
                                                                 processing_mode='w_update',float_fix_decimal=4,partial_ind= True)
@@ -136,7 +136,7 @@ def get_dialybar_by_mktstkid(market_id,stock_id:str,begin_time,end_time):
                 dt_dailybar['high']= ls_figs[4]
                 dt_dailybar['low']= ls_figs[5]
                 dt_dailybar['open']= ls_figs[6]
-                dt_dailybar['前收盘']= ls_figs[7]
+                dt_dailybar['preclose']= ls_figs[7]
                 dt_dailybar['CHG']= ls_figs[8]
                 dt_dailybar['PCHG']= ls_figs[9]
                 dt_dailybar['turnover']= ls_figs[10]
